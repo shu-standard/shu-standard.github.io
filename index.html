@@ -1,254 +1,139 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>プロフィール｜○○ ○○</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --main-color: #3b82f6;
-      --bg-color: #f3f4f6;
-      --text-color: #111827;
-      --card-bg: #ffffff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shu-star's Portfolio</title>
+    <style>
+        /* 全体のスタイル設定 */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            background-color: #f9fbff; /* 爽やかな朝のイメージ */
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        /* ヘッダー */
+        header {
+            background-color: #ffffff;
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eef2f7;
+        }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.7;
-    }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            color: #2c3e50;
+        }
 
-    header {
-      background: linear-gradient(135deg, #2563eb, #60a5fa);
-      color: white;
-      padding: 40px 20px 60px;
-      text-align: center;
-    }
+        header p {
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: -40px auto 40px;
-      padding: 0 16px;
-    }
+        /* メインコンテンツ */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
-    .profile-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.15);
-    }
+        section {
+            margin-bottom: 60px;
+        }
 
-    .profile-header {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+        h2 {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
 
-    .avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      font-weight: bold;
-      color: #6b7280;
-      flex-shrink: 0;
-    }
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
 
-    .profile-text h1 {
-      margin: 0 0 4px;
-      font-size: 28px;
-    }
+        /* ボタン */
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
 
-    .profile-text p.role {
-      margin: 0;
-      font-size: 14px;
-      opacity: 0.9;
-    }
+        .btn:hover {
+            background-color: #2980b9;
+        }
 
-    .profile-text p.location {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: #6b7280;
-    }
+        /* フッター */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
 
-    .tags {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
-
-    section {
-      margin-top: 24px;
-    }
-
-    section h2 {
-      font-size: 18px;
-      margin-bottom: 8px;
-      padding-left: 8px;
-      border-left: 4px solid var(--main-color);
-    }
-
-    section p {
-      margin: 0 0 8px;
-      font-size: 14px;
-    }
-
-    .list {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 14px;
-    }
-
-    .contact-box {
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: #eff6ff;
-      font-size: 14px;
-    }
-
-    .contact-item {
-      margin-bottom: 4px;
-    }
-
-    .contact-item span.label {
-      font-weight: 600;
-      margin-right: 4px;
-    }
-
-    a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: #6b7280;
-      padding: 16px;
-      margin-top: 16px;
-    }
-
-    @media (max-width: 600px) {
-      header {
-        padding: 28px 16px 56px;
-      }
-
-      .profile-card {
-        padding: 20px;
-      }
-
-      .profile-header {
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .profile-text h1 {
-        font-size: 22px;
-      }
-    }
-  </style>
+        /* スマホ対応 */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>プロフィールサイト</h1>
-    <p>○○ ○○（ここにあなたの名前が入ります）</p>
-  </header>
 
-  <main class="container">
-    <div class="profile-card">
-      <div class="profile-header">
-        <div class="avatar">○○</div>
-        <!-- ↑ 名前のイニシャルを入れてね（例：TA） -->
-        <div class="profile-text">
-          <h1>○○ ○○</h1>
-          <p class="role">小学校教員 ／ 5年生担任</p>
-          <p class="location">拠点：○○県○○市</p>
+    <header>
+        <h1>shu-star's Portfolio</h1>
+        <p>40代からの「内省マネジメント」と朝活の記録</p>
+    </header>
 
-          <div class="tags">
-            <span class="tag">子どもがのびのび</span>
-            <span class="tag">対話的な学び</span>
-            <span class="tag">穏やかでいること</span>
-          </div>
-        </div>
-      </div>
+    <div class="container">
+        
+        <section id="about">
+            <h2>About</h2>
+            <div class="card">
+                <p>
+                    小学校5年生の担任を務める教育者です。日々の実践や、自身の内省（リフレクション）を通じて得た気づきを発信しています。
+                    また、一人の父として、そしてランナーとして、心身ともに健やかなライフスタイルを追求しています。
+                </p>
+            </div>
+        </section>
 
-      <section>
-        <h2>自己紹介</h2>
-        <p>
-          小学校5年生の担任をしています。<br />
-          「子どもがのびのび過ごせるクラス」を大切にしながら、毎日の授業や関わりを工夫しています。
-        </p>
-        <p>
-          日々のちょっとした成長や子どもたちの表情を大事にしつつ、こちらも楽しみながら学びの場をつくっていきたいと思っています。
-        </p>
-      </section>
+        <section id="project">
+            <h2>Asanotobira 445</h2>
+            <div class="card">
+                <h3>アサノトビラ 445</h3>
+                <p>
+                    「朝の時間を、自分を整える時間に。」<br>
+                    早起きと内省を組み合わせた朝活サポートサービスを主宰しています。
+                    一日の始まりを最高の状態でスタートさせるためのコミュニティと仕組みを提供しています。
+                </p>
+            </div>
+        </section>
 
-      <section>
-        <h2>大事にしていること</h2>
-        <ul class="list">
-          <li>「大丈夫」「なんとかなる」という、力を抜ける言葉をクラスに増やすこと</li>
-          <li>子ども同士が自然に関わり合える活動づくり</li>
-          <li>失敗も含めて、チャレンジを歓迎する雰囲気づくり</li>
-        </ul>
-      </section>
+        <section id="note">
+            <h2>Writing</h2>
+            <div class="card">
+                <p>noteでは「内省の実験室」をテーマに、教育、育児、自己啓発について執筆しています。</p>
+                <a href="https://note.com/shu_star" target="_blank" class="btn">noteを読む</a>
+            </div>
+        </section>
 
-      <section>
-        <h2>趣味・好きなこと</h2>
-        <ul class="list">
-          <li>筋トレ（最近ハマり中）</li>
-          <li>ランニング（マイペースに継続中）</li>
-          <li>授業づくりのアイデアメモ</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>お問い合わせ</h2>
-        <div class="contact-box">
-          <div class="contact-item">
-            <span class="label">メール：</span>
-            <a href="mailto:example@example.com">example@example.com</a>
-          </div>
-          <div class="contact-item">
-            <span class="label">X（旧Twitter）：</span>
-            <a href="#" target="_blank">@your_account</a>
-          </div>
-          <p style="font-size: 12px; margin-top: 8px;">
-            ※実際に公開する際は、個人情報の出し方にご注意ください。
-          </p>
-        </div>
-      </section>
     </div>
-  </main>
 
-  <footer>
-    &copy; 2025 ○○ ○○
-  </footer>
+    <footer>
+        &copy; 2026 shu-star. All rights reserved.
+    </footer>
+
 </body>
 </html>
