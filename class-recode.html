@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<!-- saved from url=(0235)file:///Users/ishiharashuusei/Library/Application%20Support/Claude/local-agent-mode-sessions/8a0ae9f2-6df7-47f0-a3c3-c4749e6251d5/34d03ce1-74dc-47ba-abab-53a127d043b7/local_5c521cfd-1b0f-482d-8f50-7a55df1bd8f2/outputs/class-record.html -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クラス記録帳</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f4f0; min-height: 100vh; padding: 1.5rem 1rem; color: #1a1a18; }
+.app { max-width: 700px; margin: 0 auto; }
+.header-sub { font-size: 13px; color: #5f5e5a; margin-bottom: 1rem; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+.btn-tool { background: transparent; border: 0.5px solid #888780; border-radius: 8px; padding: 7px 14px; font-size: 13px; color: #5f5e5a; cursor: pointer; white-space: nowrap; }
+.btn-tool:hover { background: #f1efe8; }
+.btn-tool.primary { color: #0c447c; border-color: #85b7eb; background: #e6f1fb; }
+.btn-tool.primary:hover { background: #b5d4f4; }
+.btn-tool.active-mode { color: #085041; border-color: #5dcaa5; background: #e1f5ee; }
+.btn-tool.active-mode:hover { background: #9fe1cb; }
+.mode-banner { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mode-progress { flex: 1; min-width: 160px; }
+.progress-label { font-size: 12px; color: #5f5e5a; margin-bottom: 6px; }
+.progress-bar-wrap { height: 6px; background: #f1efe8; border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 6px; background: #1d9e75; border-radius: 3px; transition: width 0.3s; }
+.progress-text { font-size: 12px; color: #5f5e5a; margin-top: 4px; }
+.nav-btns { display: flex; gap: 8px; align-items: center; }
+.btn-nav { background: transparent; border: 0.5px solid #888780; border-radius: 8px; padding: 7px 14px; font-size: 13px; color: #5f5e5a; cursor: pointer; }
+.btn-nav:hover:not(:disabled) { background: #f1efe8; }
+.btn-nav:disabled { opacity: 0.35; cursor: default; }
+.btn-nav-next { background: #1d9e75; color: #e1f5ee; border: none; border-radius: 8px; padding: 7px 18px; font-size: 13px; cursor: pointer; font-weight: 500; }
+.btn-nav-next:hover:not(:disabled) { background: #0f6e56; }
+.mode-label { font-size: 11px; background: #e1f5ee; color: #085041; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.student-chip { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; position: relative; }
+.student-chip:hover { border-color: #888780; }
+.student-chip.active { border: 1.5px solid #378add; background: #e6f1fb; }
+.student-chip.done { opacity: 0.55; }
+.student-chip.current-seq { border: 1.5px solid #1d9e75; background: #e1f5ee; }
+.chip-num { position: absolute; top: 6px; left: 8px; font-size: 10px; color: #b4b2a9; }
+.chip-done-mark { position: absolute; top: 6px; right: 8px; width: 14px; height: 14px; border-radius: 50%; background: #1d9e75; display: flex; align-items: center; justify-content: center; }
+.chip-done-mark svg { width: 9px; height: 9px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; margin: 0 auto 8px; }
+.chip-name { font-size: 13px; font-weight: 500; color: #1a1a18; }
+.chip-count { font-size: 11px; color: #5f5e5a; margin-top: 2px; }
+.record-panel { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 1.25rem; }
+.panel-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.panel-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+.panel-name { font-size: 15px; font-weight: 500; color: #1a1a18; }
+.panel-sub { font-size: 12px; color: #5f5e5a; }
+.voice-section { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 0.5rem; }
+.rec-btn { width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rec-btn.idle { background: #e6f1fb; }
+.rec-btn.idle:hover { background: #b5d4f4; }
+.rec-btn.recording { background: #fcebeb; animation: pulse 1s infinite; }
+.rec-btn svg { width: 20px; height: 20px; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.6} }
+textarea { flex: 1; min-height: 80px; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #1a1a18; background: #f5f4f0; resize: vertical; line-height: 1.6; font-family: inherit; width: 100%; }
+textarea:focus { outline: none; border-color: #888780; }
+.status-bar { font-size: 12px; margin-bottom: 8px; min-height: 18px; color: #5f5e5a; }
+.status-rec { color: #0f6e56; }
+.status-cmd { color: #185fa5; font-weight: 500; }
+.status-speak { color: #534ab7; font-weight: 500; }
+.action-row { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.btn-save { background: #378add; color: #e6f1fb; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; cursor: pointer; }
+.btn-save:hover { background: #185fa5; }
+.btn-save-next { background: #1d9e75; color: #e1f5ee; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; cursor: pointer; font-weight: 500; }
+.btn-save-next:hover { background: #0f6e56; }
+.btn-save-next.triggered { background: #0f6e56; transform: scale(0.97); }
+.btn-clear { background: transparent; border: 0.5px solid #888780; border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #5f5e5a; cursor: pointer; }
+.btn-clear:hover { background: #f1efe8; }
+.voice-cmd-hint { display: flex; align-items: center; gap: 8px; background: #f5f4f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.voice-cmd-hint-label { font-size: 11px; color: #888780; white-space: nowrap; }
+.cmd-pill { font-size: 11px; background: #e1f5ee; color: #085041; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.speak-setting { display: flex; align-items: center; gap: 10px; background: #f5f4f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.speak-setting label { font-size: 12px; color: #5f5e5a; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.speak-setting select { font-size: 12px; padding: 3px 6px; border: 0.5px solid #d3d1c7; border-radius: 8px; background: #fff; color: #1a1a18; }
+.divider { border: none; border-top: 0.5px solid #d3d1c7; margin-bottom: 1rem; }
+.log-list { display: flex; flex-direction: column; gap: 10px; }
+.log-item { background: #f5f4f0; border-radius: 8px; padding: 10px 12px; }
+.log-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.log-date { font-size: 11px; color: #b4b2a9; }
+.log-text { font-size: 13px; color: #1a1a18; line-height: 1.6; }
+.log-delete { font-size: 11px; color: #b4b2a9; background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.log-delete:hover { color: #a32d2d; background: #fcebeb; }
+.empty-log { font-size: 13px; color: #b4b2a9; text-align: center; padding: 1.5rem 0; }
+.no-student { text-align: center; padding: 2rem; color: #5f5e5a; font-size: 14px; }
+.complete-banner { background: #e1f5ee; border: 0.5px solid #5dcaa5; border-radius: 12px; padding: 1.5rem; text-align: center; }
+.complete-banner p { font-size: 15px; font-weight: 500; color: #085041; margin-bottom: 8px; }
+.complete-banner small { font-size: 13px; color: #0f6e56; }
+.bulk-panel { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; }
+.bulk-panel h3 { font-size: 15px; font-weight: 500; color: #1a1a18; margin-bottom: 6px; }
+.bulk-hint { font-size: 12px; color: #5f5e5a; margin-bottom: 10px; line-height: 1.6; }
+.bulk-textarea { width: 100%; height: 130px; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #f5f4f0; resize: vertical; line-height: 1.8; font-family: inherit; color: #1a1a18; }
+.bulk-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; align-items: center; }
+.bulk-preview { font-size: 12px; color: #5f5e5a; flex: 1; }
+.bulk-preview span { color: #185fa5; font-weight: 500; }
+.btn-bulk-ok { background: #378add; color: #e6f1fb; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; cursor: pointer; }
+.btn-bulk-ok:hover { background: #185fa5; }
+.btn-bulk-cancel { background: transparent; border: 0.5px solid #888780; border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #5f5e5a; cursor: pointer; }
+.replace-row label { font-size: 12px; color: #5f5e5a; display: flex; align-items: center; gap: 5px; cursor: pointer; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="font-size:18px;font-weight:500;color:#1a1a18;">クラス記録帳</div>
+    <div id="saveIndicator" style="font-size: 11px; color: rgb(136, 135, 128);">最終保存 09:04</div>
+  </div>
+  <div class="header-sub">子供ごとに音声で振り返りを記録（このブラウザに自動保存されます）</div>
+  <div class="toolbar">
+    <button class="btn-tool primary" onclick="showBulk()">名前をまとめて入力</button>
+    <button class="btn-tool" onclick="addSingle()">+ 1人追加</button>
+    <button id="seqBtn" class="btn-tool" onclick="toggleSeqMode()" style="margin-left:auto;">順番に記録モード</button>
+    <button class="btn-tool" onclick="exportJson()" title="全データをJSONファイルとしてダウンロードします">バックアップ保存</button>
+    <button class="btn-tool" onclick="document.getElementById(&#39;importFile&#39;).click()" title="JSONファイルから復元します">読み込み</button>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importJson(event)">
+    <button class="btn-tool" onclick="clearAll()" style="color:#b4b2a9;">全員削除</button>
+  </div>
+  <div id="bulkPanel" style="display:none;"></div>
+  <div id="seqBanner" style="display:none;"></div>
+  <div class="student-grid" id="studentGrid"><div class="student-chip active" onclick="selectStudent(1)"><div class="chip-num">1</div><div class="avatar" style="background:#e6f1fb;color:#0c447c;">１ふ</div><div class="chip-name">１ふうた</div><div class="chip-count">1件の記録</div></div><div class="student-chip" onclick="selectStudent(2)"><div class="chip-num">2</div><div class="avatar" style="background:#e1f5ee;color:#085041;">２え</div><div class="chip-name">２えいと</div><div class="chip-count">0件の記録</div></div><div class="student-chip" onclick="selectStudent(3)"><div class="chip-num">3</div><div class="avatar" style="background:#eeedfe;color:#3c3489;">３み</div><div class="chip-name">３みわ</div><div class="chip-count">0件の記録</div></div><div class="student-chip" onclick="selectStudent(4)"><div class="chip-num">4</div><div class="avatar" style="background:#faeeda;color:#633806;">４み</div><div class="chip-name">４みつき</div><div class="chip-count">0件の記録</div></div><div class="student-chip" onclick="selectStudent(5)"><div class="chip-num">5</div><div class="avatar" style="background:#faece7;color:#712b13;">５は</div><div class="chip-name">５はるか</div><div class="chip-count">0件の記録</div></div><div class="student-chip" onclick="selectStudent(6)"><div class="chip-num">6</div><div class="avatar" style="background:#eaf3de;color:#27500a;">６ゆ</div><div class="chip-name">６ゆうと</div><div class="chip-count">0件の記録</div></div></div>
+  <div id="recordPanel"><div class="record-panel"><div class="panel-header"><div class="panel-avatar" style="background:#e6f1fb;color:#0c447c;">１ふ</div><div><div class="panel-name">１ふうた</div><div class="panel-sub">2026年4月19日</div></div></div><div class="voice-section"><button class="rec-btn idle" onclick="toggleRec()"><svg viewBox="0 0 24 24" fill="#378add"><path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"></path></svg></button><textarea id="transcriptBox" placeholder="ここに音声の内容が表示されます。手動で編集もできます。"></textarea></div><div class="status-bar " id="statusBar">マイクボタンを押して話しかけてください</div><div class="action-row"><button class="btn-clear" onclick="clearTranscript()">クリア</button><button class="btn-save" onclick="saveLog()">保存する</button></div><hr class="divider"><div class="log-list"><div class="log-item"><div class="log-meta"><span class="log-date">4/19 09:03</span><button class="log-delete" onclick="deleteLog(0)">削除</button></div><div class="log-text">テスト</div></div></div></div></div>
+</div>
+<script>
+const COLORS=[
+  {bg:'#e6f1fb',txt:'#0c447c'},{bg:'#e1f5ee',txt:'#085041'},
+  {bg:'#eeedfe',txt:'#3c3489'},{bg:'#faeeda',txt:'#633806'},
+  {bg:'#faece7',txt:'#712b13'},{bg:'#eaf3de',txt:'#27500a'},
+  {bg:'#fbeaf0',txt:'#72243e'},{bg:'#f1efe8',txt:'#444441'},
+];
+const STORAGE_KEY='classRecord_v1';
+let students=[], nextId=1, selected=null;
+let recording=false, recognition=null, transcript='';
+let seqMode=false, seqIndex=0, doneSets=new Set();
+let cmdCooldown=false;
+let speakEnabled=true, speakRate=1.0, voices=[];
+let saveTimer=null;
+function saveData(){
+  try{
+    const payload={ students, nextId, savedAt: new Date().toISOString() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    showSaved();
+  }catch(e){
+    const ind=document.getElementById('saveIndicator');
+    if(ind){ ind.textContent='保存に失敗（容量超過の可能性）'; ind.style.color='#a32d2d'; }
+  }
+}
+function showSaved(){
+  const ind=document.getElementById('saveIndicator');
+  if(!ind) return;
+  ind.textContent='✓ 自動保存済み';
+  ind.style.color='#0f6e56';
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    ind.textContent=`最終保存 ${t}`;
+    ind.style.color='#888780';
+  },1500);
+}
+function exportJson(){
+  if(students.length===0){ alert('保存する子供が登録されていません。'); return; }
+  const payload={ app:'classRecord', version:1, exportedAt:new Date().toISOString(), nextId, students };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date(); const pad=n=>String(n).padStart(2,'0');
+  a.href=url;
+  a.download=`class-record-backup-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const ind=document.getElementById('saveIndicator');
+  if(ind){ ind.textContent='✓ バックアップを書き出しました'; ind.style.color='#0f6e56'; setTimeout(()=>showSaved(),1500); }
+}
+function importJson(ev){
+  const file=ev.target.files&&ev.target.files[0];
+  ev.target.value='';
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data||!Array.isArray(data.students)) throw new Error('形式が正しくありません');
+      const cleaned=data.students.map(s=>({ id:Number(s.id)||0, name:String(s.name||'(名前なし)'), color:Number(s.color)||0, logs:Array.isArray(s.logs)?s.logs.map(l=>({date:String(l.date||''),text:String(l.text||'')})):[] })).filter(s=>s.name);
+      if(cleaned.length===0) throw new Error('子供のデータが見つかりません');
+      const mode=students.length===0?'replace':(confirm(`読み込み方法を選んでください：\n\n「OK」… 現在の${students.length}人を置き換える（${cleaned.length}人になります）\n「キャンセル」… 現在のリストに追加する（${students.length+cleaned.length}人になります）`)?'replace':'append');
+      if(mode==='replace'){
+        students=cleaned;
+        nextId=Math.max(typeof data.nextId==='number'?data.nextId:1, ...cleaned.map(s=>s.id))+1;
+      }else{
+        const offset=students.length;
+        cleaned.forEach((s,i)=>students.push({ id:nextId++, name:s.name, color:(offset+i)%COLORS.length, logs:s.logs }));
+      }
+      selected=null; transcript=''; seqMode=false; seqIndex=0; doneSets=new Set();
+      saveData(); render();
+      alert(`${cleaned.length}人のデータを読み込みました。`);
+    }catch(err){
+      alert('読み込みに失敗しました：\n'+err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    if(Array.isArray(data.students)){
+      students=data.students.map(s=>({ id:s.id, name:s.name, color:s.color||0, logs:Array.isArray(s.logs)?s.logs:[] }));
+    }
+    if(typeof data.nextId==='number') nextId=data.nextId;
+    const ind=document.getElementById('saveIndicator');
+    if(ind&&students.length>0){
+      const t=data.savedAt?new Date(data.savedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      ind.textContent=t?`前回保存 ${t}`:'読み込み完了';
+      ind.style.color='#888780';
+    }
+  }catch(e){
+    console.warn('保存データの読み込みに失敗:', e);
+  }
+}
+const NEXT_CMDS=['保存して次へ','次へ','つぎへ','次の子','つぎのこ','次'];
+const SKIP_CMDS=['スキップ','飛ばす','とばす'];
+const PREV_CMDS=['前に戻る','まえにもどる','前へ','まえへ','戻る','もどる'];
+function loadVoices(){
+  voices=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('ja'));
+  const sel=document.getElementById('voiceSel');
+  if(!sel||voices.length===0) return;
+  sel.innerHTML=voices.map((v,i)=>`<option value="${i}">${v.name}</option>`).join('');
+}
+if(window.speechSynthesis){
+  window.speechSynthesis.onvoiceschanged=loadVoices;
+  loadVoices();
+}
+function speak(text, onEnd){
+  if(!window.speechSynthesis||!speakEnabled){ onEnd&&onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  utt.lang='ja-JP'; utt.rate=speakRate;
+  const sel=document.getElementById('voiceSel');
+  if(sel&&voices[sel.value]) utt.voice=voices[sel.value];
+  utt.onend=()=>{ onEnd&&onEnd(); };
+  utt.onerror=()=>{ onEnd&&onEnd(); };
+  const sbar=document.getElementById('statusBar');
+  if(sbar){ sbar.textContent=`「${text}」を読み上げ中…`; sbar.className='status-bar status-speak'; }
+  window.speechSynthesis.speak(utt);
+}
+function matchCmd(text,list){ return list.some(c=>text.replace(/\s/g,'').includes(c)); }
+function checkVoiceCommand(text){
+  if(!seqMode||cmdCooldown) return false;
+  const clean=text.replace(/\s/g,'');
+  if(matchCmd(clean,NEXT_CMDS)){ cmdCooldown=true; flashCmd('「保存して次へ」を実行'); setTimeout(()=>{ seqNext(true); cmdCooldown=false; },400); return true; }
+  if(matchCmd(clean,SKIP_CMDS)){ cmdCooldown=true; flashCmd('スキップします'); setTimeout(()=>{ seqNext(false); cmdCooldown=false; },400); return true; }
+  if(matchCmd(clean,PREV_CMDS)){ cmdCooldown=true; flashCmd('前の子に戻ります'); setTimeout(()=>{ seqPrev(); cmdCooldown=false; },400); return true; }
+  return false;
+}
+function flashCmd(msg){
+  const bar=document.getElementById('statusBar');
+  if(bar){ bar.textContent=msg; bar.className='status-bar status-cmd'; }
+  const btn=document.getElementById('saveNextBtn');
+  if(btn){ btn.classList.add('triggered'); setTimeout(()=>btn.classList.remove('triggered'),400); }
+}
+function initials(n){ return n.replace(/\s/g,'').slice(0,2); }
+function fmt(){ return new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function parseBulk(t){ return t.split(/[\n、,,\t]/).map(s=>s.trim()).filter(s=>s.length>0); }
+function announceAndResume(name){
+  const wasRec=recording;
+  if(wasRec) pauseRec();
+  speak(`次は、${name}さん`, ()=>{ if(wasRec) setTimeout(resumeRec,150); });
+}
+function pauseRec(){ if(recognition) recognition.stop(); }
+function resumeRec(){
+  if(!recording) return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR) return;
+  recognition=new SR();
+  recognition.lang='ja-JP'; recognition.continuous=true; recognition.interimResults=true;
+  let base=transcript;
+  recognition.onresult=e=>{
+    let interim='',final=base;
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal){ const t=e.results[i][0].transcript; if(!checkVoiceCommand(t)){ final+=t; } else { base=final; return; } }
+      else { interim+=e.results[i][0].transcript; }
+    }
+    transcript=final+interim;
+    const box=document.getElementById('transcriptBox');
+    if(box) box.value=transcript;
+    base=final;
+  };
+  recognition.onerror=()=>{ if(recording) setTimeout(resumeRec,300); };
+  recognition.onend=()=>{ if(recording) recognition.start(); };
+  recognition.start();
+  const sbar=document.getElementById('statusBar');
+  if(sbar){ sbar.textContent='録音中… 「次へ」と言うと次の子へ進みます'; sbar.className='status-bar status-rec'; }
+}
+function toggleSeqMode(){
+  if(students.length===0){alert('先に子供を登録してください。');return;}
+  seqMode=!seqMode;
+  if(seqMode){ seqIndex=0; doneSets=new Set(); selected=students[0]; transcript=''; if(speakEnabled) speak(`順番に記録モードを開始します。最初は、${selected.name}さん`); }
+  else { selected=null; transcript=''; if(recording) stopRec(); window.speechSynthesis&&window.speechSynthesis.cancel(); }
+  render();
+}
+function seqNext(save){
+  if(save){ const box=document.getElementById('transcriptBox'); const text=(box?box.value:transcript).trim(); if(text){ selected.logs.push({date:fmt(),text}); saveData(); } doneSets.add(selected.id); }
+  transcript='';
+  if(seqIndex<students.length-1){ seqIndex++; selected=students[seqIndex]; render(); announceAndResume(selected.name); }
+  else { doneSets.add(selected.id); selected=null; if(recording){recording=false;if(recognition){recognition.stop();recognition=null;}} render(); if(speakEnabled) speak('全員の記録が完了しました。お疲れ様でした。'); }
+}
+function seqPrev(){
+  if(seqIndex>0){ if(recording) pauseRec(); transcript=''; seqIndex--; selected=students[seqIndex]; render(); announceAndResume(selected.name); }
+}
+function render(){
+  const seqBtn=document.getElementById('seqBtn');
+  if(seqBtn){ seqBtn.className=seqMode?'btn-tool active-mode':'btn-tool'; seqBtn.textContent=seqMode?'順番モード終了':'順番に記録モード'; }
+  const banner=document.getElementById('seqBanner');
+  if(seqMode&&students.length>0){
+    banner.style.display='block';
+    const done=doneSets.size, pct=Math.round(done/students.length*100);
+    if(done===students.length){
+      banner.innerHTML=`<div class="complete-banner"><p>全員の記録が完了しました！</p><small>${students.length}人 / ${students.length}人</small><br><button class="btn-tool" style="margin-top:12px;" onclick="toggleSeqMode()">モードを終了する</button></div>`;
+    } else {
+      banner.innerHTML=`<div class="mode-banner"><span class="mode-label">順番に記録モード</span><div class="mode-progress"><div class="progress-label">${done} / ${students.length} 人完了</div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div><div class="progress-text">${seqIndex+1}人目：${students[seqIndex]?.name||''}</div></div><div class="nav-btns"><button class="btn-nav" onclick="seqPrev()" ${seqIndex===0?'disabled':''}>← 前へ</button><button class="btn-nav-next" onclick="seqNext(false)">スキップ →</button></div></div>`;
+    }
+  } else { banner.style.display='none'; }
+  const grid=document.getElementById('studentGrid');
+  if(students.length===0){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:1.5rem 0;font-size:13px;color:#b4b2a9;">「名前をまとめて入力」からクラスのリストを登録しましょう</div>`;
+  } else {
+    grid.innerHTML=students.map((s,i)=>{
+      const c=COLORS[s.color%COLORS.length];
+      let cls='student-chip';
+      if(seqMode){ if(i===seqIndex) cls+=' current-seq'; else if(doneSets.has(s.id)) cls+=' done'; } else { if(selected&&selected.id===s.id) cls+=' active'; }
+      const dm=doneSets.has(s.id)?`<div class="chip-done-mark"><svg viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`:'';
+      return `<div class="${cls}" onclick="selectStudent(${s.id})"><div class="chip-num">${i+1}</div>${dm}<div class="avatar" style="background:${c.bg};color:${c.txt};">${initials(s.name)}</div><div class="chip-name">${s.name}</div><div class="chip-count">${s.logs.length}件の記録</div></div>`;
+    }).join('');
+  }
+  const panel=document.getElementById('recordPanel');
+  if(!selected||(seqMode&&doneSets.size===students.length)){ panel.innerHTML=''; return; }
+  const c=COLORS[selected.color%COLORS.length];
+  const logs=selected.logs.slice().reverse();
+  const isLast=seqMode&&seqIndex===students.length-1;
+  const hasSR=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+  const hasSTTS=!!window.speechSynthesis;
+  const speakSettingHtml=seqMode&&hasSTTS?`<div class="speak-setting"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><label><input type="checkbox" id="speakChk" ${speakEnabled?'checked':''} onchange="speakEnabled=this.checked"> 名前を読み上げる</label><label style="margin-left:8px;">速さ<select id="rateSelect" onchange="speakRate=parseFloat(this.value)" style="margin-left:4px;"><option value="0.8" ${speakRate===0.8?'selected':''}>ゆっくり</option><option value="1.0" ${speakRate===1.0?'selected':''}>普通</option><option value="1.3" ${speakRate===1.3?'selected':''}>速め</option></select></label>${voices.length>1?`<label style="margin-left:8px;">声<select id="voiceSel" style="margin-left:4px;max-width:120px;">${voices.map((v,i)=>`<option value="${i}">${v.name}</option>`).join('')}</select></label>`:''}</div>`:'';
+  const cmdHint=seqMode?`<div class="voice-cmd-hint"><span class="voice-cmd-hint-label">音声コマンド：</span><span class="cmd-pill">「次へ」</span><span class="cmd-pill">「保存して次へ」</span><span class="cmd-pill">「スキップ」</span><span class="cmd-pill">「前に戻る」</span></div>`:'';
+  panel.innerHTML=`<div class="record-panel"><div class="panel-header"><div class="panel-avatar" style="background:${c.bg};color:${c.txt};">${initials(selected.name)}</div><div><div class="panel-name">${selected.name}</div><div class="panel-sub">${seqMode?`${seqIndex+1}人目 / ${students.length}人`:new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'})}</div></div></div>${speakSettingHtml}${cmdHint}<div class="voice-section"><button class="rec-btn ${recording?'recording':'idle'}" onclick="toggleRec()">${recording?`<svg viewBox="0 0 24 24" fill="#e24b4a"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`:`<svg viewBox="0 0 24 24" fill="#378add"><path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg>`}</button><textarea id="transcriptBox" placeholder="ここに音声の内容が表示されます。手動で編集もできます。">${transcript}</textarea></div><div class="status-bar ${recording?(seqMode?'status-rec':'status-rec'):''}" id="statusBar">${recording?(seqMode?'録音中… 「次へ」と言うと次の子へ進みます':'録音中...'):(hasSR?'マイクボタンを押して話しかけてください':'テキストを直接入力できます')}</div><div class="action-row"><button class="btn-clear" onclick="clearTranscript()">クリア</button>${seqMode?`<button class="btn-save" onclick="saveLog()">保存</button><button class="btn-save-next" id="saveNextBtn" onclick="seqNext(true)">${isLast?'保存して完了':'保存して次へ →'}</button>`:`<button class="btn-save" onclick="saveLog()">保存する</button>`}</div><hr class="divider"><div class="log-list">${logs.length===0?'<div class="empty-log">まだ記録がありません</div>':logs.map((l,i)=>`<div class="log-item"><div class="log-meta"><span class="log-date">${l.date}</span><button class="log-delete" onclick="deleteLog(${selected.logs.length-1-i})">削除</button></div><div class="log-text">${l.text}</div></div>`).join('')}</div></div>`;
+  document.getElementById('transcriptBox').addEventListener('input',e=>{transcript=e.target.value;});
+}
+function selectStudent(id){
+  const idx=students.findIndex(s=>s.id===id); if(idx<0) return;
+  if(recording) stopRec(); transcript='';
+  if(seqMode){seqIndex=idx;selected=students[idx];}else{selected=students.find(s=>s.id===id);}
+  render();
+}
+function toggleRec(){ recording?stopRec():startRec(); }
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('このブラウザは音声入力に対応していません。\nChromeをお使いください。');return;}
+  recording=true; resumeRec(); render();
+}
+function stopRec(){
+  recording=false; if(recognition){recognition.stop();recognition=null;}
+  const box=document.getElementById('transcriptBox'); if(box) transcript=box.value; render();
+}
+function clearTranscript(){ transcript=''; const box=document.getElementById('transcriptBox'); if(box) box.value=''; }
+function saveLog(){
+  const box=document.getElementById('transcriptBox'); const text=(box?box.value:transcript).trim();
+  if(!text){alert('内容を入力してください。');return;}
+  selected.logs.push({date:fmt(),text}); transcript=''; saveData(); render();
+}
+function deleteLog(idx){ if(!confirm('この記録を削除しますか？')) return; selected.logs.splice(idx,1); saveData(); render(); }
+function showBulk(){
+  const panel=document.getElementById('bulkPanel'); panel.style.display='block';
+  panel.innerHTML=`<div class="bulk-panel"><h3>名前をまとめて入力</h3><div class="bulk-hint">改行・読点（、）・カンマ（,）のどれで区切ってもOKです。</div><textarea class="bulk-textarea" id="bulkInput" placeholder="田中 さくら&#10;鈴木 けんと&#10;山本 ひなた" oninput="updatePreview()"></textarea><div class="replace-row"><label><input type="checkbox" id="replaceCheck" onchange="updatePreview()"> 既存のリストをすべて置き換える</label></div><div class="bulk-actions"><div class="bulk-preview" id="bulkPreview">名前を入力してください</div><button class="btn-bulk-cancel" onclick="hideBulk()">キャンセル</button><button class="btn-bulk-ok" onclick="applyBulk()">登録する</button></div></div>`;
+  document.getElementById('bulkInput').focus();
+}
+function updatePreview(){
+  const names=parseBulk(document.getElementById('bulkInput').value);
+  const replace=document.getElementById('replaceCheck').checked;
+  document.getElementById('bulkPreview').innerHTML=names.length===0?'名前を入力してください':`<span>${names.length}人</span>を${replace?'登録':'追加'}`;
+}
+function applyBulk(){
+  const names=parseBulk(document.getElementById('bulkInput').value);
+  if(names.length===0){alert('名前を入力してください。');return;}
+  const replace=document.getElementById('replaceCheck').checked;
+  if(replace&&students.length>0&&!confirm(`現在の${students.length}人のデータを削除して置き換えますか？`)) return;
+  if(replace){students=[];selected=null;transcript='';doneSets=new Set();seqIndex=0;}
+  const offset=students.length;
+  names.forEach((name,i)=>students.push({id:nextId++,name,color:(offset+i)%COLORS.length,logs:[]}));
+  saveData(); hideBulk(); render();
+}
+function hideBulk(){ document.getElementById('bulkPanel').style.display='none'; }
+function addSingle(){
+  const name=prompt('子供の名前を入力してください'); if(!name||!name.trim()) return;
+  students.push({id:nextId++,name:name.trim(),color:students.length%COLORS.length,logs:[]}); saveData(); render();
+}
+function clearAll(){
+  if(students.length===0) return;
+  if(!confirm(`全員（${students.length}人）のデータを削除しますか？\n（ブラウザの保存データも消去されます）`)) return;
+  students=[];selected=null;transcript='';seqMode=false;seqIndex=0;doneSets=new Set();nextId=1;
+  if(recording) stopRec(); window.speechSynthesis&&window.speechSynthesis.cancel();
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  const ind=document.getElementById('saveIndicator');
+  if(ind){ ind.textContent='保存データを削除しました'; ind.style.color='#888780'; }
+  render();
+}
+loadData();
+render();
+</script>
+
+
+</body></html>
