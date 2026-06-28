@@ -94,6 +94,27 @@
   .note{font-size:.74rem;color:var(--muted);margin-top:8px}
   footer{text-align:center;color:var(--muted);font-size:.72rem;padding:24px 0 8px}
   .todaytag{background:var(--accent);color:#fff;font-size:.62rem;padding:2px 7px;border-radius:20px;font-weight:700}
+
+  /* running log */
+  .logform{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:6px}
+  .lf{display:flex;flex-direction:column;gap:4px}
+  .lf.grow{flex:1;min-width:160px}
+  .lf label{font-size:.7rem;color:var(--muted);letter-spacing:.03em}
+  .lf input,.lf select{background:var(--card2);border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:8px 10px;font-size:.92rem;width:100%;font-family:inherit}
+  .lf input[type=date]{min-width:140px}
+  .lf input[type=number]{width:100px}
+  .lf input[type=text]:not(#logMemo){width:110px}
+  .addbtn{background:var(--accent);border:none;color:#fff;font-weight:700;border-radius:8px;
+    padding:9px 16px;font-size:.9rem;cursor:pointer;white-space:nowrap}
+  .addbtn:hover{filter:brightness(1.08)}
+  .logerr{color:#ff6b6b;font-size:.78rem;min-height:1em;margin-bottom:6px}
+  .logtablewrap{overflow-x:auto;margin-top:6px}
+  #logTable td.memo{text-align:left;color:var(--muted);font-size:.78rem;max-width:160px}
+  .delx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1}
+  .delx:hover{color:#ff6b6b}
+  .chartnote{font-size:.72rem;color:var(--muted);text-align:center}
+  td .ttag{font-size:.64rem;padding:1px 6px;border-radius:5px;font-weight:700}
 </style>
 </head>
 <body>
@@ -141,6 +162,46 @@
     </div>
     <div id="weeks"></div>
     <button class="reset" id="resetBtn">チェックをすべてリセット</button>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"></span>ランニング記録</h2>
+    <div class="logform">
+      <div class="lf"><label>日付</label><input id="logDate" type="date"></div>
+      <div class="lf"><label>距離 (km)</label><input id="logDist" type="number" step="0.01" min="0" placeholder="10.5"></div>
+      <div class="lf"><label>タイム</label><input id="logTime" type="text" placeholder="0:52:30"></div>
+      <div class="lf"><label>種別</label>
+        <select id="logType">
+          <option value="easy">イージー</option>
+          <option value="long">ロング</option>
+          <option value="mp">MP走</option>
+          <option value="tempo">テンポ</option>
+          <option value="int">インターバル</option>
+          <option value="race">レース</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+      <div class="lf grow"><label>メモ</label><input id="logMemo" type="text" placeholder="調子・天気・コースなど（任意）"></div>
+      <button id="logAdd" class="addbtn">＋ 記録する</button>
+    </div>
+    <div class="logerr" id="logErr"></div>
+
+    <div class="grid" id="logStats"></div>
+
+    <canvas id="logChart" height="150" style="width:100%;margin:10px 0 4px;display:none"></canvas>
+    <div class="chartnote" id="chartNote"></div>
+
+    <div class="logtablewrap">
+      <table id="logTable">
+        <thead><tr><th>日付</th><th>種別</th><th>距離</th><th>タイム</th><th>ペース/km</th><th>メモ</th><th></th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+    <p class="note" id="logEmpty">まだ記録がありません。上のフォームから今日のランを入力してみましょう。</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="reset" id="logExport">CSVで書き出し</button>
+      <button class="reset" id="logClear">記録をすべて削除</button>
+    </div>
   </div>
 
   <div class="card tips">
@@ -395,8 +456,132 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
 });
 document.getElementById('goalInput').addEventListener('input',()=>{renderTop();renderPaces();renderSplits();});
 
+// ---- running log ----
+const LOGSTORE='sub5log_v1';
+let logs=loadLogs();
+function loadLogs(){try{return JSON.parse(localStorage.getItem(LOGSTORE))||[]}catch(e){return[]}}
+function saveLogs(){localStorage.setItem(LOGSTORE,JSON.stringify(logs));}
+const TYPEJP={easy:'イージー',long:'ロング',mp:'MP走',tempo:'テンポ',int:'インターバル',race:'レース',other:'その他'};
+const TYPECLS={easy:'tag-easy',long:'tag-long',mp:'tag-mp',tempo:'tag-tempo',int:'tag-int',race:'tag-race',other:'tag-rest'};
+
+function setToday(){const d=new Date();
+  document.getElementById('logDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function addLog(){
+  const err=document.getElementById('logErr');err.textContent='';
+  const date=document.getElementById('logDate').value;
+  const dist=parseFloat(document.getElementById('logDist').value);
+  const timeStr=document.getElementById('logTime').value.trim();
+  const type=document.getElementById('logType').value;
+  const memo=document.getElementById('logMemo').value.trim();
+  const secs=parseTime(timeStr);
+  if(!date){err.textContent='日付を入力してください';return;}
+  if(!dist||dist<=0){err.textContent='距離を正しく入力してください';return;}
+  if(secs===null||secs<=0){err.textContent='タイムは「0:52:30」や「52:30」の形式で入力してください';return;}
+  logs.push({date,dist,secs,type,memo,id:Date.now()});
+  saveLogs();
+  document.getElementById('logDist').value='';
+  document.getElementById('logTime').value='';
+  document.getElementById('logMemo').value='';
+  renderLogs();
+}
+function delLog(id){logs=logs.filter(l=>l.id!==id);saveLogs();renderLogs();}
+
+function renderLogs(){
+  const body=document.getElementById('logBody');body.innerHTML='';
+  const sorted=[...logs].sort((a,b)=>b.date.localeCompare(a.date)|| b.id-a.id);
+  document.getElementById('logEmpty').style.display=logs.length?'none':'block';
+  sorted.forEach(l=>{
+    const pace=l.secs/l.dist;
+    const tr=document.createElement('tr');
+    const [y,m,d]=l.date.split('-');
+    tr.innerHTML='<td class="km">'+m+'/'+d+'</td>'+
+      '<td><span class="ttag '+TYPECLS[l.type]+'">'+TYPEJP[l.type]+'</span></td>'+
+      '<td>'+l.dist.toFixed(2)+'<small style="color:var(--muted)"> km</small></td>'+
+      '<td>'+fmtClock(l.secs)+'</td>'+
+      '<td style="color:var(--blue)">'+fmtPace(pace)+'</td>'+
+      '<td class="memo">'+(l.memo?escapeHtml(l.memo):'')+'</td>'+
+      '<td><button class="delx" title="削除">✕</button></td>';
+    tr.querySelector('.delx').addEventListener('click',()=>{if(confirm('この記録を削除しますか？'))delLog(l.id);});
+    body.appendChild(tr);
+  });
+  renderLogStats();
+  drawChart(sorted);
+}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function renderLogStats(){
+  const grid=document.getElementById('logStats');grid.innerHTML='';
+  if(!logs.length){return;}
+  const now=new Date();const ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const total=logs.reduce((a,l)=>a+l.dist,0);
+  const totalSecs=logs.reduce((a,l)=>a+l.secs,0);
+  const monthDist=logs.filter(l=>l.date.startsWith(ym)).reduce((a,l)=>a+l.dist,0);
+  const avgPace=totalSecs/total;
+  const longest=logs.reduce((a,l)=>Math.max(a,l.dist),0);
+  const stats=[
+    {k:'累計距離',v:total.toFixed(1)+'<small> km</small>'},
+    {k:'今月の距離',v:monthDist.toFixed(1)+'<small> km</small>'},
+    {k:'記録数',v:logs.length+'<small> 回</small>'},
+    {k:'平均ペース',v:fmtPace(avgPace)+'<small> /km</small>'},
+    {k:'最長距離',v:longest.toFixed(1)+'<small> km</small>'},
+  ];
+  stats.forEach(s=>{const dv=document.createElement('div');dv.className='stat';
+    dv.innerHTML='<div class="k">'+s.k+'</div><div class="v">'+s.v+'</div>';grid.appendChild(dv);});
+}
+
+function drawChart(sorted){
+  const cv=document.getElementById('logChart');const note=document.getElementById('chartNote');
+  const data=[...sorted].reverse().slice(-20); // oldest->newest, last 20
+  if(data.length<2){cv.style.display='none';note.textContent='';return;}
+  cv.style.display='block';
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth||600,H=150;
+  cv.width=W*dpr;cv.height=H*dpr;
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const pad={l:32,r:8,t:10,b:20};
+  const max=Math.max(...data.map(d=>d.dist))*1.1;
+  const bw=(W-pad.l-pad.r)/data.length;
+  // gridlines
+  ctx.strokeStyle='#2f3a45';ctx.fillStyle='#8c9aa8';ctx.font='10px sans-serif';ctx.lineWidth=1;
+  for(let i=0;i<=2;i++){const val=max/2*i;const y=H-pad.b-(val/max)*(H-pad.t-pad.b);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    ctx.textAlign='right';ctx.fillText(Math.round(val),pad.l-4,y+3);}
+  const col={easy:'#34c759',long:'#3a8dde',mp:'#ff9b5e',tempo:'#ff8fb8',int:'#d08fff',race:'#ff6b35',other:'#8c9aa8'};
+  data.forEach((d,i)=>{
+    const h=(d.dist/max)*(H-pad.t-pad.b);
+    const x=pad.l+i*bw+bw*0.15;const y=H-pad.b-h;
+    ctx.fillStyle=col[d.type]||'#8c9aa8';
+    ctx.fillRect(x,y,bw*0.7,h);
+  });
+  ctx.fillStyle='#8c9aa8';ctx.textAlign='center';
+  ctx.fillText(data[0].date.slice(5),pad.l+bw*0.5,H-6);
+  ctx.fillText(data[data.length-1].date.slice(5),W-pad.r-bw*0.5,H-6);
+  note.textContent='直近'+data.length+'回の距離(km)　色＝種別';
+}
+
+function exportCsv(){
+  if(!logs.length){return;}
+  const rows=[['日付','種別','距離km','タイム','ペース/km','メモ']];
+  [...logs].sort((a,b)=>a.date.localeCompare(b.date)).forEach(l=>{
+    rows.push([l.date,TYPEJP[l.type],l.dist.toFixed(2),fmtClock(l.secs),fmtPace(l.secs/l.dist),l.memo.replace(/,/g,' ')]);
+  });
+  const csv='﻿'+rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='running_log.csv';a.click();URL.revokeObjectURL(url);
+}
+
+document.getElementById('logAdd').addEventListener('click',addLog);
+document.getElementById('logMemo').addEventListener('keydown',e=>{if(e.key==='Enter')addLog();});
+document.getElementById('logTime').addEventListener('keydown',e=>{if(e.key==='Enter')addLog();});
+document.getElementById('logExport').addEventListener('click',exportCsv);
+document.getElementById('logClear').addEventListener('click',()=>{
+  if(logs.length&&confirm('すべての記録を削除します。よろしいですか？')){logs=[];saveLogs();renderLogs();}});
+window.addEventListener('resize',()=>renderLogs());
+
 // init
-renderTop();renderPaces();renderSplits();renderWeeks();
+setToday();
+renderTop();renderPaces();renderSplits();renderWeeks();renderLogs();
 setInterval(renderTop,3600000);
 </script>
 </body>
