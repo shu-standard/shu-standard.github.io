@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サブ5 マラソン伴走コーチ</title>
+<style>
+  :root{
+    --bg:#0f1419; --card:#1a2129; --card2:#222b35; --line:#2f3a45;
+    --text:#e8edf2; --muted:#8c9aa8; --accent:#ff6b35; --accent2:#34c759;
+    --blue:#3a8dde; --warn:#ffcc44;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+  .wrap{max-width:880px;margin:0 auto;padding:16px}
+  header{text-align:center;padding:24px 0 8px}
+  header h1{font-size:1.5rem;font-weight:800;letter-spacing:.02em}
+  header h1 .g{color:var(--accent)}
+  header p{color:var(--muted);font-size:.85rem;margin-top:4px}
+
+  .countdown{background:linear-gradient(135deg,#ff6b35,#ff3d6e);border-radius:18px;
+    padding:20px;text-align:center;margin:16px 0;box-shadow:0 8px 30px rgba(255,80,60,.25)}
+  .countdown .days{font-size:3rem;font-weight:900;line-height:1}
+  .countdown .lbl{font-size:.8rem;opacity:.9;letter-spacing:.1em}
+  .countdown .date{font-size:.85rem;margin-top:6px;opacity:.95}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .stat .k{color:var(--muted);font-size:.72rem;letter-spacing:.05em}
+  .stat .v{font-size:1.5rem;font-weight:800;margin-top:2px}
+  .stat .v small{font-size:.7rem;color:var(--muted);font-weight:500}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
+  .card h2{font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .card h2 .ic{width:6px;height:20px;background:var(--accent);border-radius:3px}
+
+  .goalrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .goalrow label{font-size:.85rem;color:var(--muted)}
+  .goalrow input{background:var(--card2);border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:8px 10px;font-size:1rem;width:120px;text-align:center;font-variant-numeric:tabular-nums}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--line);font-size:.88rem}
+  th{color:var(--muted);font-weight:600;font-size:.75rem;letter-spacing:.03em}
+  td.km{text-align:left;font-weight:600}
+  .pacechip{display:inline-block;padding:2px 8px;border-radius:6px;font-weight:700;font-size:.8rem}
+
+  .progresswrap{margin:6px 0 16px}
+  .bar{height:10px;background:var(--card2);border-radius:6px;overflow:hidden}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),#5be07d);width:0;transition:width .4s}
+  .progresswrap .t{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:6px}
+
+  .week{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;background:var(--card2)}
+  .week summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;user-select:none}
+  .week summary::-webkit-details-marker{display:none}
+  .wphase{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+  .ph-base{background:#21405e;color:#8fc4ff}
+  .ph-build{background:#5e3a21;color:#ffb88f}
+  .ph-peak{background:#5e2140;color:#ff8fb8}
+  .ph-taper{background:#214d3a;color:#8fffc4}
+  .ph-race{background:var(--accent);color:#fff}
+  .ph-recover{background:#3a3a3a;color:#bbb}
+  .wmeta{flex:1;min-width:0}
+  .wmeta .wt{font-weight:700;font-size:.92rem}
+  .wmeta .wd{font-size:.72rem;color:var(--muted)}
+  .wkm{font-size:.78rem;color:var(--muted);white-space:nowrap}
+  .wcheck{font-size:.72rem;color:var(--accent2);white-space:nowrap;font-weight:700}
+  .week[open] summary{border-bottom:1px solid var(--line)}
+  .days{padding:6px 14px 12px}
+  .day{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--line)}
+  .day:last-child{border-bottom:none}
+  .day input[type=checkbox]{appearance:none;width:22px;height:22px;border:2px solid var(--line);
+    border-radius:7px;cursor:pointer;flex-shrink:0;margin-top:2px;position:relative;background:var(--card)}
+  .day input[type=checkbox]:checked{background:var(--accent2);border-color:var(--accent2)}
+  .day input[type=checkbox]:checked::after{content:"✓";position:absolute;color:#0f1419;
+    font-weight:900;font-size:.85rem;top:-1px;left:4px}
+  .day .dn{font-size:.72rem;color:var(--muted);width:42px;flex-shrink:0;font-weight:700;margin-top:2px}
+  .day .dc{flex:1}
+  .day .dc .tt{font-weight:600;font-size:.9rem}
+  .day .dc .tt .tag{font-size:.66rem;padding:1px 6px;border-radius:5px;margin-left:6px;font-weight:700}
+  .day .dc .ds{font-size:.78rem;color:var(--muted)}
+  .day.done .dc .tt{text-decoration:line-through;opacity:.5}
+  .tag-easy{background:#214d3a;color:#8fffc4}.tag-long{background:#21405e;color:#8fc4ff}
+  .tag-mp{background:#5e3a21;color:#ffb88f}.tag-tempo{background:#5e2140;color:#ff8fb8}
+  .tag-int{background:#4d215e;color:#d08fff}.tag-rest{background:#3a3a3a;color:#bbb}
+  .tag-race{background:var(--accent);color:#fff}
+
+  .tips li{margin:6px 0 6px 18px;font-size:.86rem}
+  .tips strong{color:var(--accent)}
+  .reset{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    padding:6px 12px;font-size:.78rem;cursor:pointer;margin-top:8px}
+  .reset:hover{border-color:var(--accent);color:var(--accent)}
+  .note{font-size:.74rem;color:var(--muted);margin-top:8px}
+  footer{text-align:center;color:var(--muted);font-size:.72rem;padding:24px 0 8px}
+  .todaytag{background:var(--accent);color:#fff;font-size:.62rem;padding:2px 7px;border-radius:20px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>サブ5 マラソン<span class="g">伴走コーチ</span></h1>
+    <p>目標：フルマラソン 5時間切り　🎯　本番 2026年10月25日</p>
+  </header>
+
+  <div class="countdown">
+    <div class="lbl">RACE DAY まで</div>
+    <div class="days" id="cdDays">--</div>
+    <div class="date" id="cdDate"></div>
+  </div>
+
+  <div class="grid" id="statGrid"></div>
+
+  <div class="card">
+    <h2><span class="ic"></span>目標タイムとペース設定</h2>
+    <div class="goalrow">
+      <label>目標タイム</label>
+      <input id="goalInput" type="text" value="4:55:00">
+      <span class="note" style="margin:0">サブ5は5:00:00（7:07/km）。バッファ込みで4:55を推奨。</span>
+    </div>
+    <table>
+      <thead><tr><th>種別</th><th>ペース /km</th><th>用途</th></tr></thead>
+      <tbody id="paceTable"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"></span>本番ペース配分（5kmスプリット）</h2>
+    <table>
+      <thead><tr><th>地点</th><th>区間タイム</th><th>累計タイム</th><th>時計の目安</th></tr></thead>
+      <tbody id="splitTable"></tbody>
+    </table>
+    <p class="note">前半は目標ペースより5〜10秒/km抑えめ、25km以降を粘る「イーブン〜ネガティブ」が安全。表は均等割りの基準値です。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"></span>17週間トレーニング計画</h2>
+    <div class="progresswrap">
+      <div class="t"><span id="progTxt">0 / 0 完了</span><span id="progPct">0%</span></div>
+      <div class="bar"><i id="progBar"></i></div>
+    </div>
+    <div id="weeks"></div>
+    <button class="reset" id="resetBtn">チェックをすべてリセット</button>
+  </div>
+
+  <div class="card tips">
+    <h2><span class="ic"></span>サブ5を達成するコツ</h2>
+    <ul>
+      <li><strong>ペースを守る：</strong>序盤の「いける感じ」が最大の敵。前半を目標+5〜10秒/kmで我慢する。</li>
+      <li><strong>30kmの壁対策：</strong>練習で一度は30km走を経験し、補給（ジェル）を30〜40分ごとに摂る習慣をつける。</li>
+      <li><strong>歩かない工夫：</strong>給水所では歩いてもOK。完全に止まらず、ゆっくりでも脚を動かし続ける。</li>
+      <li><strong>故障防止：</strong>週の走行距離は前週比10%増まで。違和感があれば1〜2日休む勇気を。</li>
+      <li><strong>本番装備は練習で試す：</strong>シューズ・ウェア・補給は本番でぶっつけ本番にしない。</li>
+      <li><strong>テーパリング：</strong>最後の2週間は距離を落として疲労を抜く。走力は落ちません。</li>
+    </ul>
+  </div>
+
+  <footer>
+    進捗はこの端末のブラウザに自動保存されます。<br>
+    ※本計画は一般的な目安です。体調・既往症に応じて無理のない範囲で調整してください。
+  </footer>
+</div>
+
+<script>
+const RACE = new Date(2026,9,25); // Oct 25 2026
+const START = new Date(2026,5,29); // Jun 29 2026 (Mon)
+const STORE = 'sub5coach_v1';
+
+// ---- helpers ----
+function parseTime(str){
+  const p=str.trim().split(':').map(Number);
+  if(p.length===3 && p.every(n=>!isNaN(n))) return p[0]*3600+p[1]*60+p[2];
+  if(p.length===2 && p.every(n=>!isNaN(n))) return p[0]*60+p[1];
+  return null;
+}
+function fmtPace(s){const m=Math.floor(s/60);const sec=Math.round(s%60);return m+":"+String(sec).padStart(2,'0');}
+function fmtClock(s){const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=Math.round(s%60);
+  return h+":"+String(m).padStart(2,'0')+":"+String(sec).padStart(2,'0');}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function fmtDate(d){return (d.getMonth()+1)+"/"+d.getDate();}
+const WD=['日','月','火','水','木','金','土'];
+
+// ---- countdown & stats ----
+function renderTop(){
+  const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const days=Math.round((RACE-today)/86400000);
+  document.getElementById('cdDays').textContent = days>0? days+" 日" : (days===0? "今日！" : "完走おつかれ様！");
+  document.getElementById('cdDate').textContent = "2026年10月25日(日) スタート";
+  const weeksLeft=Math.max(0,Math.ceil(days/7));
+  const grid=document.getElementById('statGrid');
+  grid.innerHTML='';
+  const goal=parseTime(document.getElementById('goalInput').value)||17700;
+  const mp=goal/42.195;
+  const stats=[
+    {k:'残り週数',v:weeksLeft+'<small> 週</small>'},
+    {k:'目標ペース',v:fmtPace(mp)+'<small> /km</small>'},
+    {k:'ハーフ通過目安',v:fmtClock(mp*21.0975)},
+    {k:'サブ5との差',v:'+'+fmtPace((18000-goal)>0?(18000-goal)/42.195*0+ (goal? (5*60):0):0)}
+  ];
+  // simpler 4th stat: buffer vs sub5
+  stats[3]={k:'サブ5との貯金',v:(18000-goal>=0? '+'+fmtClock(18000-goal):'-'+fmtClock(goal-18000))};
+  stats.forEach(s=>{const d=document.createElement('div');d.className='stat';
+    d.innerHTML='<div class="k">'+s.k+'</div><div class="v">'+s.v+'</div>';grid.appendChild(d);});
+}
+
+// ---- pace zones ----
+function renderPaces(){
+  const goal=parseTime(document.getElementById('goalInput').value);
+  if(!goal){return;}
+  const mp=goal/42.195; // sec/km
+  const zones=[
+    {n:'イージー (E)',off:[70,100],c:'tag-easy',u:'土台づくり・回復走。会話できる楽な強度'},
+    {n:'ロング (L)',off:[40,70],c:'tag-long',u:'長距離走。後半ややペースアップ'},
+    {n:'マラソンペース (MP)',off:[0,0],c:'tag-mp',u:'本番の目標ペース。体に覚え込ませる'},
+    {n:'テンポ (T)',off:[-35,-25],c:'tag-tempo',u:'閾値走。ややきつい〜きつい20〜40分'},
+    {n:'インターバル (I)',off:[-75,-55],c:'tag-int',u:'スピード刺激。3〜5分×数本'},
+  ];
+  const tb=document.getElementById('paceTable');tb.innerHTML='';
+  const col={'tag-easy':'#8fffc4','tag-long':'#8fc4ff','tag-mp':'#ffb88f','tag-tempo':'#ff8fb8','tag-int':'#d08fff'};
+  zones.forEach(z=>{
+    let label;
+    if(z.off[0]===0&&z.off[1]===0){label=fmtPace(mp);}
+    else{label=fmtPace(mp+z.off[1])+'〜'+fmtPace(mp+z.off[0]);}
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td class="km">'+z.n+'</td>'+
+      '<td><span class="pacechip" style="background:'+col[z.c]+'22;color:'+col[z.c]+'">'+label+'</span></td>'+
+      '<td style="color:var(--muted);font-size:.78rem">'+z.u+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+// ---- race splits ----
+function renderSplits(){
+  const goal=parseTime(document.getElementById('goalInput').value);if(!goal)return;
+  const mp=goal/42.195;
+  const pts=[5,10,15,20,21.0975,25,30,35,40,42.195];
+  const lbl={21.0975:'ハーフ',42.195:'FINISH'};
+  const tb=document.getElementById('splitTable');tb.innerHTML='';
+  let prev=0,prevd=0;
+  pts.forEach(d=>{
+    const cum=mp*d;const seg=cum-prev;
+    const name=lbl[d]||(d+'km');
+    const tr=document.createElement('tr');
+    if(d===42.195)tr.style.fontWeight='800';
+    tr.innerHTML='<td class="km">'+name+'</td>'+
+      '<td style="color:var(--muted)">'+fmtClock(seg)+'</td>'+
+      '<td>'+fmtClock(cum)+'</td>'+
+      '<td style="color:var(--blue)">'+fmtPace(mp)+'/km</td>';
+    tb.appendChild(tr);prev=cum;prevd=d;
+  });
+}
+
+// ---- training plan data ----
+// type tags: easy,long,mp,tempo,int,rest,race
+const PLAN=[
+ {ph:'base',name:'基礎づくり①',d:[
+   {n:'火',t:'イージー 6km',tag:'easy',s:'Eペースでリラックス'},
+   {n:'木',t:'テンポ 6km',tag:'tempo',s:'うち20分をTペース'},
+   {n:'土',t:'イージー 6km',tag:'easy',s:'回復ジョグ'},
+   {n:'日',t:'ロング 14km',tag:'long',s:'Lペースで一定'}]},
+ {ph:'base',name:'基礎づくり②',d:[
+   {n:'火',t:'イージー 7km',tag:'easy',s:''},
+   {n:'木',t:'インターバル 3分×5',tag:'int',s:'Iペース、つなぎ2分ジョグ'},
+   {n:'土',t:'イージー 6km',tag:'easy',s:''},
+   {n:'日',t:'ロング 16km',tag:'long',s:''}]},
+ {ph:'base',name:'基礎づくり③',d:[
+   {n:'火',t:'イージー 7km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 7km',tag:'tempo',s:'うち25分をTペース'},
+   {n:'土',t:'イージー 6km',tag:'easy',s:''},
+   {n:'日',t:'ロング 18km',tag:'long',s:'後半5kmややペースアップ'}]},
+ {ph:'recover',name:'回復週',d:[
+   {n:'火',t:'イージー 6km',tag:'easy',s:'疲労を抜く'},
+   {n:'木',t:'イージー 6km',tag:'easy',s:'流し4本'},
+   {n:'土',t:'休養',tag:'rest',s:'ストレッチ・ケア'},
+   {n:'日',t:'ロング 14km',tag:'long',s:'楽に'}]},
+ {ph:'base',name:'基礎づくり④',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 8km',tag:'tempo',s:'うち30分をTペース'},
+   {n:'土',t:'イージー 7km',tag:'easy',s:''},
+   {n:'日',t:'ロング 20km',tag:'long',s:'30〜40分ごとに補給練習'}]},
+ {ph:'build',name:'ビルド①',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'MP走 8km',tag:'mp',s:'マラソンペースを体感'},
+   {n:'土',t:'イージー 7km',tag:'easy',s:''},
+   {n:'日',t:'ロング 22km',tag:'long',s:''}]},
+ {ph:'build',name:'ビルド②',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'インターバル 3分×6',tag:'int',s:''},
+   {n:'土',t:'イージー 7km',tag:'easy',s:''},
+   {n:'日',t:'ロング 24km',tag:'long',s:'後半MPで'}]},
+ {ph:'recover',name:'回復週',d:[
+   {n:'火',t:'イージー 7km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 6km',tag:'tempo',s:'軽め'},
+   {n:'土',t:'休養',tag:'rest',s:''},
+   {n:'日',t:'ロング 18km',tag:'long',s:'楽に'}]},
+ {ph:'build',name:'ビルド③',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'MP走 10km',tag:'mp',s:''},
+   {n:'土',t:'イージー 8km',tag:'easy',s:''},
+   {n:'日',t:'ロング 26km',tag:'long',s:'補給フル装備で'}]},
+ {ph:'build',name:'ビルド④',d:[
+   {n:'火',t:'イージー 9km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 10km',tag:'tempo',s:'うち35分Tペース'},
+   {n:'土',t:'イージー 8km',tag:'easy',s:''},
+   {n:'日',t:'ロング 28km',tag:'long',s:'30kmの壁を意識'}]},
+ {ph:'peak',name:'ピーク①',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'MP走 12km',tag:'mp',s:'本番の予行'},
+   {n:'土',t:'イージー 8km',tag:'easy',s:''},
+   {n:'日',t:'ロング 30km',tag:'long',s:'本番装備でシミュレーション'}]},
+ {ph:'recover',name:'回復週',d:[
+   {n:'火',t:'イージー 7km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 8km',tag:'tempo',s:''},
+   {n:'土',t:'休養',tag:'rest',s:''},
+   {n:'日',t:'ロング 22km',tag:'long',s:''}]},
+ {ph:'peak',name:'ピーク②（最長走）',d:[
+   {n:'火',t:'イージー 9km',tag:'easy',s:''},
+   {n:'木',t:'MP走 12km',tag:'mp',s:''},
+   {n:'土',t:'イージー 8km',tag:'easy',s:''},
+   {n:'日',t:'ロング 32km',tag:'long',s:'最長距離。完走の自信をつける'}]},
+ {ph:'peak',name:'ピーク③',d:[
+   {n:'火',t:'イージー 8km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 10km',tag:'tempo',s:''},
+   {n:'土',t:'イージー 8km',tag:'easy',s:''},
+   {n:'日',t:'ロング 28km',tag:'long',s:'後半MP'}]},
+ {ph:'taper',name:'テーパリング①',d:[
+   {n:'火',t:'イージー 7km',tag:'easy',s:''},
+   {n:'木',t:'MP走 8km',tag:'mp',s:'感覚を確認'},
+   {n:'土',t:'イージー 6km',tag:'easy',s:''},
+   {n:'日',t:'ロング 24km',tag:'long',s:'距離を落とし始める'}]},
+ {ph:'taper',name:'テーパリング②',d:[
+   {n:'火',t:'イージー 6km',tag:'easy',s:''},
+   {n:'木',t:'テンポ 6km',tag:'tempo',s:'うち15分Tペース＋流し'},
+   {n:'土',t:'イージー 5km',tag:'easy',s:''},
+   {n:'日',t:'ロング 16km',tag:'long',s:'疲労を抜きつつ刺激'}]},
+ {ph:'race',name:'レース週🏁',d:[
+   {n:'火',t:'イージー 5km',tag:'easy',s:'流し3〜4本'},
+   {n:'木',t:'軽いjog 4km',tag:'easy',s:'うち1kmだけMP。脚の確認'},
+   {n:'土',t:'休養 or 軽ジョグ',tag:'rest',s:'カーボローディング・睡眠重視'},
+   {n:'日',t:'🏃 本番 42.195km',tag:'race',s:'前半我慢→後半粘り。サブ5達成！'}]},
+];
+const phName={base:'基礎',build:'ビルド',peak:'ピーク',taper:'調整',race:'本番',recover:'回復'};
+
+let state=loadState();
+function loadState(){try{return JSON.parse(localStorage.getItem(STORE))||{}}catch(e){return{}}}
+function saveState(){localStorage.setItem(STORE,JSON.stringify(state));}
+
+function renderWeeks(){
+  const wrap=document.getElementById('weeks');wrap.innerHTML='';
+  const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let totalDone=0,totalAll=0;let openSet=false;
+  PLAN.forEach((wk,wi)=>{
+    const wStart=addDays(START,wi*7);const wEnd=addDays(wStart,6);
+    const isCurrent = today>=wStart && today<=wEnd;
+    const det=document.createElement('details');det.className='week';
+    if(isCurrent){det.open=true;openSet=true;}
+    let doneCount=0;
+    wk.d.forEach((_,di)=>{if(state[wi+'-'+di])doneCount++;});
+    totalDone+=doneCount;totalAll+=wk.d.length;
+    const sum=document.createElement('summary');
+    sum.innerHTML=
+      '<span class="wphase ph-'+wk.ph+'">'+phName[wk.ph]+'</span>'+
+      '<div class="wmeta"><div class="wt">第'+(wi+1)+'週　'+wk.name+(isCurrent?' <span class="todaytag">今週</span>':'')+'</div>'+
+      '<div class="wd">'+fmtDate(wStart)+'('+WD[wStart.getDay()]+') 〜 '+fmtDate(wEnd)+'('+WD[wEnd.getDay()]+')</div></div>'+
+      (doneCount===wk.d.length?'<span class="wcheck">✓完了</span>':'<span class="wkm">'+doneCount+'/'+wk.d.length+'</span>');
+    det.appendChild(sum);
+    const dd=document.createElement('div');dd.className='days';
+    wk.d.forEach((day,di)=>{
+      const key=wi+'-'+di;const done=!!state[key];
+      const row=document.createElement('label');row.className='day'+(done?' done':'');
+      row.innerHTML='<input type="checkbox" '+(done?'checked':'')+'>'+
+        '<span class="dn">'+day.n+'</span>'+
+        '<span class="dc"><div class="tt">'+day.t+'<span class="tag tag-'+day.tag+'">'+tagLabel(day.tag)+'</span></div>'+
+        (day.s?'<div class="ds">'+day.s+'</div>':'')+'</span>';
+      const cb=row.querySelector('input');
+      cb.addEventListener('change',()=>{state[key]=cb.checked;saveState();renderWeeks();updateProgress();});
+      dd.appendChild(row);
+    });
+    det.appendChild(dd);
+    wrap.appendChild(det);
+  });
+  updateProgress(totalDone,totalAll);
+}
+function tagLabel(t){return{easy:'E',long:'Long',mp:'MP',tempo:'Tempo',int:'Interval',rest:'休',race:'RACE'}[t]||t;}
+function updateProgress(done,all){
+  if(done===undefined){done=0;all=0;PLAN.forEach((wk,wi)=>wk.d.forEach((_,di)=>{all++;if(state[wi+'-'+di])done++;}));}
+  const pct=all?Math.round(done/all*100):0;
+  document.getElementById('progTxt').textContent=done+' / '+all+' 完了';
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progBar').style.width=pct+'%';
+}
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('すべてのチェックを消去します。よろしいですか？')){state={};saveState();renderWeeks();}
+});
+document.getElementById('goalInput').addEventListener('input',()=>{renderTop();renderPaces();renderSplits();});
+
+// init
+renderTop();renderPaces();renderSplits();renderWeeks();
+setInterval(renderTop,3600000);
+</script>
+</body>
+</html>
