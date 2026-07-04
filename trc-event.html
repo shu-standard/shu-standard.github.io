@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏休みチャレンジ2026 | TEACHERS RUNNING CLUB</title>
+<meta name="description" content="TRC夏休みチャレンジ2026。7月21日〜8月23日、みんなで2026kmを目指して走ります!">
+<style>
+  :root {
+    --sky: #57C2FC;
+    --sky-light: #A8E0FF;
+    --sky-pale: #EAF7FF;
+    --orange: #F0A02E;
+    --orange-dark: #D88A1A;
+    --ink: #1A1A1A;
+    --white: #FFFFFF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+    color: var(--ink); background: var(--white); line-height: 1.8;
+  }
+  a { color: inherit; }
+
+  header { position: sticky; top: 0; z-index: 100; background: var(--sky); border-bottom: 4px solid var(--ink); }
+  .header-inner { max-width: 1080px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand-name { font-weight: 900; font-size: 1.05rem; letter-spacing: .05em; }
+  .brand-name small { display: block; font-size: .65rem; font-weight: 700; letter-spacing: .2em; }
+  nav ul { display: flex; gap: 6px; list-style: none; flex-wrap: wrap; }
+  nav a { text-decoration: none; font-weight: 700; font-size: .85rem; padding: 8px 14px; border-radius: 999px; transition: background .2s; }
+  nav a:hover { background: rgba(255,255,255,.5); }
+
+  .hero { background: var(--sky); text-align: center; padding: 56px 20px 0; overflow: hidden; }
+  .hero .badge { display: inline-block; background: var(--ink); color: var(--white); font-weight: 900; letter-spacing: .2em; font-size: .8rem; padding: 6px 20px; border-radius: 999px; }
+  .hero h1 { font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 900; letter-spacing: .04em; margin-top: 16px; }
+  .hero p.period { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: 900; margin-top: 10px; }
+  .hero p.period span { background: var(--white); border: 3px solid var(--ink); border-radius: 999px; padding: 6px 22px; display: inline-block; }
+  .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+  .btn { display: inline-block; text-decoration: none; font-weight: 900; padding: 14px 32px; border-radius: 999px; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); transition: transform .15s, box-shadow .15s; font-size: 1rem; background: var(--white); }
+  .btn:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+  .btn-orange { background: var(--orange); }
+  .hero-wave { display: block; width: 100%; margin-top: 40px; }
+
+  section { padding: 64px 20px; }
+  .container { max-width: 1080px; margin: 0 auto; }
+  .section-title { text-align: center; margin-bottom: 40px; }
+  .section-title .en { display: inline-block; font-size: .8rem; font-weight: 900; letter-spacing: .25em; color: var(--white); background: var(--ink); padding: 4px 16px; border-radius: 999px; }
+  .section-title h2 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; margin-top: 12px; }
+  .bg-pale { background: var(--sky-pale); }
+
+  /* チャレンジ紹介 */
+  .challenges { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .challenge { background: var(--white); border: 3px solid var(--ink); border-radius: 20px; padding: 28px 24px; box-shadow: 6px 6px 0 var(--orange); position: relative; }
+  .challenge .num { position: absolute; top: -18px; left: 20px; background: var(--sky); border: 3px solid var(--ink); border-radius: 999px; font-weight: 900; padding: 2px 16px; font-size: .9rem; }
+  .challenge h3 { font-size: 1.15rem; font-weight: 900; margin: 10px 0 8px; }
+  .challenge p { font-size: .92rem; }
+
+  /* 集計 */
+  .progress-card { background: var(--white); border: 3px solid var(--ink); border-radius: 24px; padding: 36px 28px; box-shadow: 8px 8px 0 var(--sky-light); text-align: center; }
+  .total-km { font-size: clamp(2.4rem, 8vw, 4rem); font-weight: 900; color: var(--orange-dark); line-height: 1.2; }
+  .total-km small { font-size: .4em; color: var(--ink); }
+  .goal-label { font-weight: 700; font-size: .95rem; margin-top: 4px; }
+  .bar { margin: 20px auto 8px; max-width: 640px; height: 30px; border: 3px solid var(--ink); border-radius: 999px; background: var(--sky-pale); overflow: hidden; }
+  .bar-fill { height: 100%; width: 0%; background: repeating-linear-gradient(45deg, var(--orange), var(--orange) 12px, var(--orange-dark) 12px, var(--orange-dark) 24px); border-radius: 999px; transition: width 1.2s ease; }
+  .bar-pct { font-weight: 900; }
+  .mini-stats { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .mini-stat { background: var(--sky-pale); border-radius: 14px; padding: 10px 22px; }
+  .mini-stat .v { font-weight: 900; font-size: 1.2rem; }
+  .mini-stat .k { font-size: .75rem; font-weight: 700; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 40px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  .panel { background: var(--white); border: 3px solid var(--ink); border-radius: 20px; overflow: hidden; box-shadow: 6px 6px 0 var(--sky-light); }
+  .panel-head { background: var(--sky); border-bottom: 3px solid var(--ink); padding: 12px 20px; font-weight: 900; }
+  .panel table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .panel td, .panel th { padding: 9px 16px; border-bottom: 1px solid #E0EEF7; text-align: left; }
+  .panel tr:last-child td { border-bottom: none; }
+  .panel .km { text-align: right; font-weight: 900; white-space: nowrap; }
+  .rank-1 .medal::before { content: "🥇"; }
+  .rank-2 .medal::before { content: "🥈"; }
+  .rank-3 .medal::before { content: "🥉"; }
+  .loading { text-align: center; padding: 24px; font-weight: 700; color: #777; }
+
+  /* 参加方法 */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; counter-reset: step; }
+  .step { position: relative; background: var(--white); border: 3px solid var(--ink); border-radius: 20px; padding: 40px 24px 28px; box-shadow: 6px 6px 0 var(--orange); }
+  .step::before { counter-increment: step; content: counter(step); position: absolute; top: -18px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--orange); border: 3px solid var(--ink); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; }
+  .step h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; }
+  .step p { font-size: .92rem; }
+  .form-note { text-align: center; margin-top: 28px; font-size: .9rem; color: #555; }
+
+  footer { background: var(--ink); color: var(--white); text-align: center; padding: 32px 20px; font-size: .82rem; }
+  footer a { color: var(--sky-light); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-name">TRC<small>TEACHERS RUNNING CLUB</small></span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="#challenges">チャレンジ内容</a></li>
+        <li><a href="#stats">みんなの記録</a></li>
+        <li><a href="#howto">参加方法</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <span class="badge">SUMMER EVENT</span>
+    <h1>夏休みチャレンジ2026</h1>
+    <p class="period"><span>7月21日(火) 〜 8月23日(日)</span></p>
+    <div class="hero-cta">
+      <a class="btn btn-orange" id="cta-form" href="#howto">記録を投稿する</a>
+      <a class="btn" href="#stats">現在の記録を見る</a>
+    </div>
+    <svg class="hero-wave" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0 40 C240 80 480 0 720 40 C960 80 1200 0 1440 40 L1440 80 L0 80 Z" fill="#FFFFFF"/>
+    </svg>
+  </div>
+
+  <!-- ===== チャレンジ内容 ===== -->
+  <section id="challenges">
+    <div class="container">
+      <div class="section-title">
+        <span class="en">CHALLENGES</span>
+        <h2>3つのチャレンジ</h2>
+      </div>
+      <div class="challenges">
+        <div class="challenge">
+          <span class="num">チャレンジ 1</span>
+          <h3>🎯 個人チャレンジ</h3>
+          <p>ご自身で決めた目標に向けて頑張ります!距離でも回数でも、目標は自由。夏の終わりに達成報告をしましょう。</p>
+        </div>
+        <div class="challenge">
+          <span class="num">チャレンジ 2</span>
+          <h3>🤝 みんなでチャレンジ</h3>
+          <p>みんなで走った距離の合計で <b>2026キロ</b> を目指します!一人ひとりの1kmが積み重なります。</p>
+        </div>
+        <div class="challenge">
+          <span class="num">チャレンジ 3</span>
+          <h3>⚡ 1キロタイムアタック</h3>
+          <p>1kmの自己ベストに挑戦!期間中のベストタイムをコミュニティで報告し合いましょう。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 集計 ===== -->
+  <section id="stats" class="bg-pale">
+    <div class="container">
+      <div class="section-title">
+        <span class="en">LIVE STATS</span>
+        <h2>みんなでチャレンジ 現在の記録</h2>
+      </div>
+
+      <div class="progress-card">
+        <div class="total-km"><span id="total">--</span><small> km</small></div>
+        <div class="goal-label">目標 2026km まで <b id="remain">--</b> km!</div>
+        <div class="bar"><div class="bar-fill" id="bar"></div></div>
+        <div class="bar-pct"><span id="pct">--</span>%</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="v" id="runners">--</div><div class="k">参加ランナー</div></div>
+          <div class="mini-stat"><div class="v" id="posts">--</div><div class="k">投稿数</div></div>
+          <div class="mini-stat"><div class="v" id="avg">--</div><div class="k">平均距離/回</div></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head">🏆 ランキング(累計距離 TOP10)</div>
+          <div id="ranking" class="loading">読み込み中...</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">🆕 新着記録</div>
+          <div id="recent" class="loading">読み込み中...</div>
+        </div>
+      </div>
+      <p class="form-note" id="data-note">※ 記録はスプレッドシートから自動で読み込んでいます。</p>
+    </div>
+  </section>
+
+  <!-- ===== 参加方法 ===== -->
+  <section id="howto">
+    <div class="container">
+      <div class="section-title">
+        <span class="en">HOW TO JOIN</span>
+        <h2>参加方法</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <h3>走る</h3>
+          <p>期間中(7/21〜8/23)、好きな時間に好きな場所で走ります。距離は自由!</p>
+        </div>
+        <div class="step">
+          <h3>フォームで記録を投稿</h3>
+          <p>走ったら「日付・名前・距離」を投稿フォームから送信。記録は自動でシートに集計されます。</p>
+        </div>
+        <div class="step">
+          <h3>Xコミュニティでシェア</h3>
+          <p><a href="https://x.com/i/communities/1497320839641198592" target="_blank" rel="noopener"><b>Xコミュニティ</b></a>にも投稿して、仲間と励まし合いましょう!</p>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top: 40px;">
+        <a class="btn btn-orange" id="form-btn" href="#" target="_blank" rel="noopener">📝 記録投稿フォームを開く</a>
+        <p class="form-note" id="form-note"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div style="font-weight:900; letter-spacing:.1em; margin-bottom:6px;">TEACHERS RUNNING CLUB</div>
+  <div><a href="index.html">ホームへ戻る</a> | &copy; 2026 TRC</div>
+</footer>
+
+<script>
+/* ================= 設定 =================
+   今年用のフォーム・シートができたらここを書き換えるだけでOK
+========================================== */
+const CONFIG = {
+  // Googleフォームの回答URL
+  FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLScLwTOaG4J_yKIDH6jKiFzl6-C24EorgH1zVA3-w2woUxZXYQ/viewform",
+  // 記録が入るスプレッドシートのID
+  SHEET_ID: "1-4V3oLc9NH00sdC4qQjtJysamcXEA9I8aRvJRfD4YGU",
+  // 対象シート(タブ)の名前 ※フォームの回答が入るタブ
+  SHEET_NAME: "フォームの回答 1",
+  // 列の並び: 日付 / 名前 / 距離 の列番号(0始まり)
+  COL_DATE: 1, COL_NAME: 2, COL_DIST: 3,
+  GOAL_KM: 2026
+};
+
+/* フォームボタンの状態 */
+(function(){
+  const btn = document.getElementById('form-btn');
+  const note = document.getElementById('form-note');
+  const cta = document.getElementById('cta-form');
+  if (CONFIG.FORM_URL) {
+    btn.href = CONFIG.FORM_URL;
+    cta.href = CONFIG.FORM_URL;
+    cta.target = "_blank";
+  } else {
+    btn.style.opacity = .55; btn.style.pointerEvents = "none";
+    note.textContent = "投稿フォームは準備中です。公開までしばらくお待ちください!";
+  }
+})();
+
+/* シート読み込み(gviz JSON) */
+(async function(){
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(CONFIG.SHEET_NAME)}&tqx=out:json&_=${Date.now()}`;
+  try {
+    const txt = await (await fetch(url)).text();
+    const json = JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    const rows = json.table.rows || [];
+    const records = [];
+    for (const r of rows) {
+      const c = r.c || [];
+      const name = cell(c[CONFIG.COL_NAME]);
+      const dist = parseFloat(cellRaw(c[CONFIG.COL_DIST]));
+      const date = cell(c[CONFIG.COL_DATE]);
+      if (name && !isNaN(dist) && dist > 0) records.push({ date, name: String(name).trim(), dist });
+    }
+    render(records);
+  } catch(e) {
+    document.getElementById('ranking').textContent = '読み込みに失敗しました';
+    document.getElementById('recent').textContent = '読み込みに失敗しました';
+    document.getElementById('data-note').textContent = '※ 記録の読み込みに失敗しました。シートの共有設定(リンクを知っている全員が閲覧可)をご確認ください。';
+  }
+
+  function cell(c){ return c ? (c.f !== undefined && c.f !== null ? c.f : c.v) : null; }
+  function cellRaw(c){ return c ? c.v : null; }
+
+  function render(records){
+    if (!records.length) {
+      document.getElementById('ranking').textContent = 'まだ記録がありません';
+      document.getElementById('recent').textContent = '最初の1kmを投稿しよう!';
+      document.getElementById('total').textContent = '0';
+      document.getElementById('remain').textContent = CONFIG.GOAL_KM.toLocaleString();
+      document.getElementById('pct').textContent = '0';
+      document.getElementById('runners').textContent = '0人';
+      document.getElementById('posts').textContent = '0件';
+      return;
+    }
+    const total = records.reduce((s,r)=>s+r.dist, 0);
+    const byName = {};
+    records.forEach(r => byName[r.name] = (byName[r.name]||0) + r.dist);
+    const names = Object.keys(byName);
+
+    document.getElementById('total').textContent = total.toLocaleString(undefined,{maximumFractionDigits:1});
+    document.getElementById('remain').textContent = Math.max(0, CONFIG.GOAL_KM - total).toLocaleString(undefined,{maximumFractionDigits:1});
+    const pct = Math.min(100, total / CONFIG.GOAL_KM * 100);
+    document.getElementById('pct').textContent = pct.toFixed(1);
+    requestAnimationFrame(()=>{ document.getElementById('bar').style.width = pct + '%'; });
+    document.getElementById('runners').textContent = names.length + '人';
+    document.getElementById('posts').textContent = records.length + '件';
+    document.getElementById('avg').textContent = records.length ? (total/records.length).toFixed(1) + 'km' : '--';
+
+    const top = names.map(n=>({n, km: byName[n]})).sort((a,b)=>b.km-a.km).slice(0,10);
+    document.getElementById('ranking').outerHTML = '<table>' + top.map((t,i)=>
+      `<tr class="rank-${i+1}"><td style="width:2.5em" class="medal">${i>2 ? (i+1)+'位' : ''}</td><td>${esc(t.n)}</td><td class="km">${t.km.toFixed(1)} km</td></tr>`
+    ).join('') + '</table>';
+
+    const recent = records.slice(-8).reverse();
+    document.getElementById('recent').outerHTML = '<table>' + recent.map(r=>
+      `<tr><td style="width:5.5em">${esc(r.date||'')}</td><td>${esc(r.name)}</td><td class="km">${r.dist.toFixed(2)} km</td></tr>`
+    ).join('') + '</table>';
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+})();
+</script>
+
+</body>
+</html>
