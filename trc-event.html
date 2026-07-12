@@ -83,6 +83,15 @@
   .rank-3 .medal::before { content: "🥉"; }
   .loading { text-align: center; padding: 24px; font-weight: 700; color: #777; }
 
+  /* 参加者一覧 */
+  .members { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; }
+  .member { display: flex; align-items: center; gap: 12px; background: var(--white); border: 3px solid var(--ink); border-radius: 16px; padding: 12px 14px; text-decoration: none; box-shadow: 4px 4px 0 var(--sky-light); transition: transform .15s, box-shadow .15s; }
+  .member:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--sky-light); }
+  .member .avatar { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--ink); object-fit: cover; flex-shrink: 0; background: var(--sky-pale); }
+  .member .avatar-fallback { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--ink); flex-shrink: 0; background: var(--sky); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; }
+  .member .m-name { font-weight: 900; font-size: .88rem; line-height: 1.4; word-break: break-all; }
+  .member .m-handle { font-size: .75rem; font-weight: 700; color: var(--orange-dark); }
+
   /* 参加方法 */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; counter-reset: step; }
   .step { position: relative; background: var(--white); border: 3px solid var(--ink); border-radius: 20px; padding: 40px 24px 28px; box-shadow: 6px 6px 0 var(--orange); }
@@ -107,6 +116,7 @@
         <li><a href="index.html">ホーム</a></li>
         <li><a href="#challenges">チャレンジ内容</a></li>
         <li><a href="#stats">みんなの記録</a></li>
+        <li><a href="#members">参加者</a></li>
         <li><a href="#howto">参加方法</a></li>
       </ul>
     </nav>
@@ -188,8 +198,20 @@
     </div>
   </section>
 
+  <!-- ===== 参加者一覧 ===== -->
+  <section id="members">
+    <div class="container">
+      <div class="section-title">
+        <span class="en">MEMBERS</span>
+        <h2>参加者一覧</h2>
+      </div>
+      <div class="members" id="members-list"><div class="loading">読み込み中...</div></div>
+      <p class="form-note">※ アイコンをタップするとXのプロフィールページが開きます。</p>
+    </div>
+  </section>
+
   <!-- ===== 参加方法 ===== -->
-  <section id="howto">
+  <section id="howto" class="bg-pale">
     <div class="container">
       <div class="section-title">
         <span class="en">HOW TO JOIN</span>
@@ -314,6 +336,40 @@ const CONFIG = {
     ).join('') + '</table>';
   }
   function esc(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+})();
+
+/* 参加者一覧の読み込み(「参加者一覧」タブ: A列=名前, B列=Xユーザー名) */
+(async function(){
+  const box = document.getElementById('members-list');
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?sheet=${encodeURIComponent('参加者一覧')}&tqx=out:json&_=${Date.now()}`;
+  try {
+    const txt = await (await fetch(url)).text();
+    const json = JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    const rows = json.table.rows || [];
+    const members = [];
+    for (const r of rows) {
+      const c = r.c || [];
+      const name = c[0] && (c[0].f ?? c[0].v);
+      let handle = c[1] && (c[1].f ?? c[1].v);
+      if (!name) continue;
+      handle = handle ? String(handle).trim().replace(/^@/, '') : '';
+      members.push({ name: String(name).trim(), handle });
+    }
+    if (!members.length) { box.innerHTML = '<div class="loading">まだ登録されていません</div>'; return; }
+    box.innerHTML = members.map(m => {
+      const esc = s => String(s).replace(/[&<>"']/g, x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+      const initial = esc(m.name.charAt(0));
+      const avatar = m.handle
+        ? `<img class="avatar" src="https://unavatar.io/x/${encodeURIComponent(m.handle)}?fallback=false" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;avatar-fallback&quot;>${initial}</div>'">`
+        : `<div class="avatar-fallback">${initial}</div>`;
+      const inner = `${avatar}<div><div class="m-name">${esc(m.name)}</div>${m.handle ? `<div class="m-handle">@${esc(m.handle)}</div>` : ''}</div>`;
+      return m.handle
+        ? `<a class="member" href="https://x.com/${encodeURIComponent(m.handle)}" target="_blank" rel="noopener">${inner}</a>`
+        : `<div class="member">${inner}</div>`;
+    }).join('');
+  } catch(e) {
+    box.innerHTML = '<div class="loading">読み込みに失敗しました。シートに「参加者一覧」タブがあるかご確認ください。</div>';
+  }
 })();
 </script>
 
