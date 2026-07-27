@@ -330,10 +330,17 @@ const CONFIG = {
       `<tr class="rank-${i+1}"><td style="width:2.5em" class="medal">${i>2 ? (i+1)+'位' : ''}</td><td>${esc(t.n)}</td><td class="km">${t.km.toFixed(1)} km</td></tr>`
     ).join('') + '</table>';
 
-    const recent = records.slice(-8).reverse();
-    document.getElementById('recent').outerHTML = '<table>' + recent.map(r=>
-      `<tr><td style="width:5.5em">${esc(r.date||'')}</td><td>${esc(r.name)}</td><td class="km">${r.dist.toFixed(2)} km</td></tr>`
-    ).join('') + '</table>';
+    const renderRecent = (all) => {
+      const list = all ? records.slice().reverse() : records.slice(-8).reverse();
+      const el = document.getElementById('recent');
+      el.className = '';
+      el.innerHTML = '<div style="' + (all ? 'max-height:420px;overflow-y:auto;' : '') + '"><table>' + list.map(r=>
+        `<tr><td style="width:5.5em">${esc(r.date||'')}</td><td>${esc(r.name)}</td><td class="km">${r.dist.toFixed(2)} km</td></tr>`
+      ).join('') + '</table></div>' +
+      `<div style="text-align:center; padding:12px; border-top:2px solid var(--ink);"><a href="#" id="toggle-recent" style="font-weight:900; color:var(--orange-dark); text-decoration:none;">${all ? '▲ 閉じる' : `▼ 全て見る(${records.length}件)`}</a></div>`;
+      document.getElementById('toggle-recent').addEventListener('click', (e)=>{ e.preventDefault(); renderRecent(!all); });
+    };
+    renderRecent(false);
   }
   function esc(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 })();
