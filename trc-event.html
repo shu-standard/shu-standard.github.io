@@ -325,10 +325,18 @@ const CONFIG = {
     document.getElementById('posts').textContent = records.length + '件';
     document.getElementById('avg').textContent = records.length ? (total/records.length).toFixed(1) + 'km' : '--';
 
-    const top = names.map(n=>({n, km: byName[n]})).sort((a,b)=>b.km-a.km).slice(0,10);
-    document.getElementById('ranking').outerHTML = '<table>' + top.map((t,i)=>
-      `<tr class="rank-${i+1}"><td style="width:2.5em" class="medal">${i>2 ? (i+1)+'位' : ''}</td><td>${esc(t.n)}</td><td class="km">${t.km.toFixed(1)} km</td></tr>`
-    ).join('') + '</table>';
+    const sorted = names.map(n=>({n, km: byName[n]})).sort((a,b)=>b.km-a.km);
+    const renderRanking = (all) => {
+      const list = all ? sorted : sorted.slice(0,10);
+      const el = document.getElementById('ranking');
+      el.className = '';
+      el.innerHTML = '<div style="' + (all ? 'max-height:420px;overflow-y:auto;' : '') + '"><table>' + list.map((t,i)=>
+        `<tr class="rank-${i+1}"><td style="width:2.5em" class="medal">${i>2 ? (i+1)+'位' : ''}</td><td>${esc(t.n)}</td><td class="km">${t.km.toFixed(1)} km</td></tr>`
+      ).join('') + '</table></div>' +
+      `<div style="text-align:center; padding:12px; border-top:2px solid var(--ink);"><a href="#" id="toggle-ranking" style="font-weight:900; color:var(--orange-dark); text-decoration:none;">${all ? '▲ TOP10に戻す' : `▼ 全て見る(${sorted.length}人)`}</a></div>`;
+      document.getElementById('toggle-ranking').addEventListener('click', (e)=>{ e.preventDefault(); renderRanking(!all); });
+    };
+    renderRanking(false);
 
     const renderRecent = (all) => {
       const list = all ? records.slice().reverse() : records.slice(-8).reverse();
