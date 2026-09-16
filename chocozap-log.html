@@ -1,0 +1,1274 @@
+<title>チョコザップログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #f5f7ef;
+    --surface: #ffffff;
+    --surface-2: #eef1e3;
+    --text: #15190f;
+    --text-muted: #5c6353;
+    --line: #dfe4d2;
+    --accent: #b6e61c;
+    --accent-ink: #1a2400;
+    --run: #3163e0;
+    --run-soft: #e8eefd;
+    --gym-soft: #eef8cf;
+    --machine: #8452d8;
+    --machine-soft: #efe7fb;
+    --danger: #d94b4b;
+    --danger-soft: #fbe7e6;
+    --shadow: 0 1px 2px rgba(20, 24, 12, 0.04), 0 6px 16px rgba(20, 24, 12, 0.05);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e100a;
+      --surface: #181b12;
+      --surface-2: #20241750;
+      --text: #edf1e2;
+      --text-muted: #9aa38b;
+      --line: #2a2f1e;
+      --accent: #c3f53c;
+      --accent-ink: #131a02;
+      --run: #7ea3ff;
+      --run-soft: #1c2740;
+      --gym-soft: #26301496;
+      --machine: #b79dfb;
+      --machine-soft: #2a2140;
+      --danger: #ff8a8a;
+      --danger-soft: #3a1f1f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0e100a;
+    --surface: #181b12;
+    --surface-2: #20241750;
+    --text: #edf1e2;
+    --text-muted: #9aa38b;
+    --line: #2a2f1e;
+    --accent: #c3f53c;
+    --accent-ink: #131a02;
+    --run: #7ea3ff;
+    --run-soft: #1c2740;
+    --gym-soft: #26301496;
+    --machine: #b79dfb;
+    --machine-soft: #2a2140;
+    --danger: #ff8a8a;
+    --danger-soft: #3a1f1f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    padding-inline: 16px;
+    padding-block: 20px 48px;
+  }
+
+  .display {
+    font-family: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  header.top .titles h1 {
+    font-size: clamp(22px, 5vw, 28px);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  header.top .titles p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .mode-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  @media (min-width: 520px) {
+    .stat-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-tile .icon {
+    width: 22px;
+    height: 22px;
+    color: var(--accent-icon, var(--text-muted));
+  }
+
+  .stat-tile .icon.gym { color: #7a9a00; }
+  .stat-tile .icon.run { color: var(--run); }
+  .stat-tile .icon.streak { color: #e08a2b; }
+  .stat-tile .icon.total { color: var(--text-muted); }
+
+  .stat-tile .value {
+    font-size: 22px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-tile .value .unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 2px;
+  }
+
+  .stat-tile .label {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 9px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .tab-btn[aria-selected="true"] {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  .tab-btn .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .tab-btn.gym .dot { background: var(--accent); }
+  .tab-btn.run .dot { background: var(--run); }
+  .tab-btn.machine .dot { background: var(--machine); }
+
+  .add-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:focus-visible, .tab-btn:focus-visible, .chip:focus-visible, .icon-btn:focus-visible {
+    outline: 2px solid var(--run);
+    outline-offset: 2px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: transparent;
+  }
+
+  .btn-primary.run-theme {
+    background: var(--run);
+    color: #fff;
+  }
+
+  .btn-primary.machine-theme {
+    background: var(--machine);
+    color: #fff;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-muted);
+  }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-card h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .field input, .field textarea {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 9px 10px;
+    width: 100%;
+  }
+
+  .field textarea { resize: vertical; min-height: 44px; }
+
+  .field input:focus, .field textarea:focus {
+    outline: 2px solid var(--run);
+    outline-offset: 1px;
+  }
+
+  .mini-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    font-family: inherit;
+    font-size: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 6px 11px;
+    cursor: pointer;
+  }
+
+  .chip:hover { color: var(--text); }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .month-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .month-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding-left: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .entry-card {
+    display: flex;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    align-items: center;
+  }
+
+  .entry-stripe {
+    width: 4px;
+    align-self: stretch;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .entry-card.gym .entry-stripe { background: var(--accent); }
+  .entry-card.run .entry-stripe { background: var(--run); }
+  .entry-card.machine .entry-stripe { background: var(--machine); }
+
+  .best-tag {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--machine-soft);
+    color: var(--machine);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 4px;
+  }
+
+  .machine-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .machine-chip.active {
+    background: var(--machine);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .custom-input-row {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .custom-input-row input {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 11px;
+    width: 120px;
+  }
+
+  .machine-summary {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .machine-summary-name {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .machine-summary-last, .machine-summary-best {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .machine-summary-last b, .machine-summary-best b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .entry-main { flex: 1; min-width: 0; }
+
+  .entry-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .entry-date {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .entry-title {
+    font-weight: 700;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .entry-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  .entry-stats b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  .entry-memo {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .entry-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  .icon-btn[data-del]:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .icon-btn[data-edit]:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 28px 16px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon { width: 30px; height: 30px; color: var(--text-muted); }
+  .empty-state p { margin: 0; font-size: 13px; max-width: 34ch; }
+
+  .example-card {
+    opacity: 0.55;
+    pointer-events: none;
+    position: relative;
+  }
+
+  .example-tag {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 4px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding-top: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="titles">
+      <h1 class="display">チョコザップログ</h1>
+      <p>マシントレーニングとランニングをまとめて記録</p>
+    </div>
+    <span class="mode-note" id="modeNote" hidden></span>
+  </header>
+
+  <section class="stat-grid" id="statGrid" aria-label="サマリー"></section>
+
+  <nav class="tabs" role="tablist" aria-label="記録の種類">
+    <button class="tab-btn gym" id="tabGymBtn" role="tab"><span class="dot"></span>ジム記録</button>
+    <button class="tab-btn run" id="tabRunBtn" role="tab"><span class="dot"></span>ラン</button>
+    <button class="tab-btn machine" id="tabMachineBtn" role="tab"><span class="dot"></span>マシン</button>
+  </nav>
+
+  <div id="machinePickerHost"></div>
+
+  <div class="add-row">
+    <button class="btn btn-primary" id="addToggleBtn">＋ 記録を追加</button>
+  </div>
+
+  <div id="formHost"></div>
+
+  <section class="entry-list" id="entryHost" aria-live="polite"></section>
+
+  <footer>記録はこのページに保存され、あなただけが見られます。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var ICONS = {
+    dumbbell: '<svg class="icon gym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9v6M2 10.5v3M7 7v10M17 7v10M20 10.5v3M22 9v6M7 12h10"/></svg>',
+    run: '<svg class="icon run" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="5" r="1.8" fill="currentColor" stroke="none"/><path d="M12.5 8.5l2 3-3 2.2.5 4.3M14.5 11.5l3.5 1.3-1 3.7M8.5 13l-3 1.5v3.5M10.5 8l-3.5 2"/></svg>',
+    flame: '<svg class="icon streak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3-3 4-3 7.5A3.5 3.5 0 0 0 12 13a2 2 0 0 0 2-2c1.2.9 2 2.4 2 4a4 4 0 0 1-8 0c0-3 1.5-4.5 2-6 .3-1 .2-2-1-2.5C10 4.5 11 3 12 2z"/></svg>',
+    calendar: '<svg class="icon total" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
+  };
+
+  var GYM_CHIPS = ["筋トレ", "ながらウォーク", "エアロバイク", "AIストレッチ", "セルフエステ", "ヨガ"];
+
+  var MACHINES = [
+    "①ショルダープレス", "②チェストプレス", "③ラットプルダウン", "④バックエクステンション",
+    "⑤アブドミナル", "⑥レッグプレス", "⑦レッグエクステンション", "⑧レッグカール",
+    "⑨アブダクション", "⑩アダクション"
+  ];
+
+  var gymDocs = [];
+  var runDocs = [];
+  var machineDocs = [];
+  var db = null;
+  var mode = "loading";
+  var activeTab = "gym";
+  var formOpen = false;
+  var selectedMachine = null;
+  var customInputOpen = false;
+  var editingId = null;
+
+  function todayStr() {
+    var d = new Date();
+    var tz = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function saveLocal() {
+    try {
+      localStorage.setItem("chocozaplog_gym", JSON.stringify(gymDocs));
+      localStorage.setItem("chocozaplog_runs", JSON.stringify(runDocs));
+      localStorage.setItem("chocozaplog_machines", JSON.stringify(machineDocs));
+    } catch (e) {}
+  }
+
+  function allMachineOptions() {
+    var seen = {};
+    var list = [];
+    function add(name) {
+      if (name && !seen[name]) { seen[name] = true; list.push(name); }
+    }
+    MACHINES.forEach(add);
+    try {
+      JSON.parse(localStorage.getItem("chocozaplog_custom_machines") || "[]").forEach(add);
+    } catch (e) {}
+    machineDocs.forEach(function (d) { add(d.machine); });
+    return list;
+  }
+
+  function sortDesc(arr) {
+    arr.sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0); });
+  }
+
+  async function initData() {
+    try {
+      db = await window.claude.use("db");
+    } catch (e) {
+      db = null;
+    }
+    try { selectedMachine = localStorage.getItem("chocozaplog_selected_machine") || null; } catch (e) {}
+    if (db) {
+      mode = "db";
+      db.collection("gym").orderBy("date", "desc").onSnapshot(function (snap) {
+        gymDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+        render();
+      }, function (err) { console.error("gym snapshot error", err); });
+      db.collection("runs").orderBy("date", "desc").onSnapshot(function (snap) {
+        runDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+        render();
+      }, function (err) { console.error("runs snapshot error", err); });
+      db.collection("machines").orderBy("date", "desc").onSnapshot(function (snap) {
+        machineDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+        render();
+      }, function (err) { console.error("machines snapshot error", err); });
+    } else {
+      mode = "local";
+      try { gymDocs = JSON.parse(localStorage.getItem("chocozaplog_gym") || "[]"); } catch (e) { gymDocs = []; }
+      try { runDocs = JSON.parse(localStorage.getItem("chocozaplog_runs") || "[]"); } catch (e) { runDocs = []; }
+      try { machineDocs = JSON.parse(localStorage.getItem("chocozaplog_machines") || "[]"); } catch (e) { machineDocs = []; }
+      sortDesc(gymDocs);
+      sortDesc(runDocs);
+      sortDesc(machineDocs);
+    }
+    render();
+  }
+
+  async function addGym(data) {
+    if (mode === "db") {
+      await db.collection("gym").add(data);
+    } else {
+      gymDocs.unshift(Object.assign({ id: "g_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
+      sortDesc(gymDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function addRun(data) {
+    if (mode === "db") {
+      await db.collection("runs").add(data);
+    } else {
+      runDocs.unshift(Object.assign({ id: "r_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
+      sortDesc(runDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function addMachine(data) {
+    if (mode === "db") {
+      await db.collection("machines").add(data);
+    } else {
+      machineDocs.unshift(Object.assign({ id: "m_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
+      sortDesc(machineDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function updateGym(id, data) {
+    if (mode === "db") {
+      await db.collection("gym").doc(id).update(data);
+    } else {
+      var idx = gymDocs.findIndex(function (d) { return d.id === id; });
+      if (idx !== -1) gymDocs[idx] = Object.assign({}, gymDocs[idx], data);
+      sortDesc(gymDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function updateRun(id, data) {
+    if (mode === "db") {
+      await db.collection("runs").doc(id).update(data);
+    } else {
+      var idx = runDocs.findIndex(function (d) { return d.id === id; });
+      if (idx !== -1) runDocs[idx] = Object.assign({}, runDocs[idx], data);
+      sortDesc(runDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function updateMachine(id, data) {
+    if (mode === "db") {
+      await db.collection("machines").doc(id).update(data);
+    } else {
+      var idx = machineDocs.findIndex(function (d) { return d.id === id; });
+      if (idx !== -1) machineDocs[idx] = Object.assign({}, machineDocs[idx], data);
+      sortDesc(machineDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function removeRecord(type, id) {
+    if (!window.confirm("この記録を削除しますか？")) return;
+    if (mode === "db") {
+      await db.collection(type).doc(id).delete();
+    } else {
+      if (type === "gym") gymDocs = gymDocs.filter(function (d) { return d.id !== id; });
+      else if (type === "runs") runDocs = runDocs.filter(function (d) { return d.id !== id; });
+      else if (type === "machines") machineDocs = machineDocs.filter(function (d) { return d.id !== id; });
+      saveLocal();
+      render();
+    }
+  }
+
+  function formatPace(paceMinPerKm) {
+    if (!isFinite(paceMinPerKm) || paceMinPerKm <= 0) return "-";
+    var m = Math.floor(paceMinPerKm);
+    var s = Math.round((paceMinPerKm - m) * 60);
+    if (s === 60) { m += 1; s = 0; }
+    return m + "'" + String(s).padStart(2, "0") + '"';
+  }
+
+  function monthLabel(dateStr) {
+    var parts = (dateStr || "").split("-");
+    if (parts.length < 2) return "その他";
+    return parts[0] + "年" + parseInt(parts[1], 10) + "月";
+  }
+
+  function computeStats() {
+    var ym = todayStr().slice(0, 7);
+    var thisMonthGym = gymDocs.filter(function (d) { return (d.date || "").slice(0, 7) === ym; }).length;
+    var thisMonthDistance = runDocs
+      .filter(function (d) { return (d.date || "").slice(0, 7) === ym; })
+      .reduce(function (sum, d) { return sum + (Number(d.distance) || 0); }, 0);
+
+    var dateSet = {};
+    gymDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
+    runDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
+    machineDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
+    var totalDays = Object.keys(dateSet).length;
+
+    var streak = 0;
+    var cursor = new Date(todayStr() + "T00:00:00");
+    if (!dateSet[todayStr()]) cursor.setDate(cursor.getDate() - 1);
+    while (true) {
+      var y = cursor.getFullYear();
+      var m = String(cursor.getMonth() + 1).padStart(2, "0");
+      var day = String(cursor.getDate()).padStart(2, "0");
+      var key = y + "-" + m + "-" + day;
+      if (dateSet[key]) { streak++; cursor.setDate(cursor.getDate() - 1); }
+      else break;
+    }
+
+    return { thisMonthGym: thisMonthGym, thisMonthDistance: thisMonthDistance, totalDays: totalDays, streak: streak };
+  }
+
+  function renderStats() {
+    var s = computeStats();
+    var host = document.getElementById("statGrid");
+    host.innerHTML =
+      '<div class="stat-tile">' + ICONS.dumbbell +
+        '<div class="value">' + s.thisMonthGym + '<span class="unit">回</span></div>' +
+        '<div class="label">今月のジム</div></div>' +
+      '<div class="stat-tile">' + ICONS.run +
+        '<div class="value">' + s.thisMonthDistance.toFixed(1) + '<span class="unit">km</span></div>' +
+        '<div class="label">今月のラン距離</div></div>' +
+      '<div class="stat-tile">' + ICONS.flame +
+        '<div class="value">' + s.streak + '<span class="unit">日</span></div>' +
+        '<div class="label">連続記録</div></div>' +
+      '<div class="stat-tile">' + ICONS.calendar +
+        '<div class="value">' + s.totalDays + '<span class="unit">日</span></div>' +
+        '<div class="label">総記録日数</div></div>';
+  }
+
+  function renderTabs() {
+    var gymBtn = document.getElementById("tabGymBtn");
+    var runBtn = document.getElementById("tabRunBtn");
+    var machineBtn = document.getElementById("tabMachineBtn");
+    gymBtn.setAttribute("aria-selected", String(activeTab === "gym"));
+    runBtn.setAttribute("aria-selected", String(activeTab === "run"));
+    machineBtn.setAttribute("aria-selected", String(activeTab === "machine"));
+    var addBtn = document.getElementById("addToggleBtn");
+    var theme = activeTab === "run" ? " run-theme" : activeTab === "machine" ? " machine-theme" : "";
+    addBtn.className = "btn btn-primary" + theme;
+  }
+
+  function gymFormHtml() {
+    var editing = editingId ? gymDocs.find(function (d) { return d.id === editingId; }) : null;
+    var chips = GYM_CHIPS.map(function (c) {
+      return '<button type="button" class="chip" data-chip="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>';
+    }).join("");
+    return (
+      '<form class="form-card" id="gymForm">' +
+        '<h2>' + (editing ? "ジム記録を編集" : "ジム記録を追加") + '</h2>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="gymDate">日付</label><input type="date" id="gymDate" required></div>' +
+          '<div class="field"><label for="gymDuration">時間（分）</label><input type="number" id="gymDuration" min="1" step="1" placeholder="45" required></div>' +
+        '</div>' +
+        '<div class="field"><label for="gymMenu">メニュー</label><input type="text" id="gymMenu" placeholder="例：ながらウォーク30分+筋トレ" required></div>' +
+        '<div class="chip-row">' + chips + '</div>' +
+        '<div class="field"><label for="gymMemo">メモ（任意）</label><textarea id="gymMemo" placeholder="調子や体重など"></textarea></div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-ghost" id="gymCancel">キャンセル</button>' +
+          '<button type="submit" class="btn btn-primary">' + (editing ? "更新" : "保存") + '</button>' +
+        '</div>' +
+      '</form>'
+    );
+  }
+
+  function runFormHtml() {
+    var editing = editingId ? runDocs.find(function (d) { return d.id === editingId; }) : null;
+    return (
+      '<form class="form-card" id="runForm">' +
+        '<h2>' + (editing ? "ランニング記録を編集" : "ランニング記録を追加") + '</h2>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="runDate">日付</label><input type="date" id="runDate" required></div>' +
+          '<div class="field"><label for="runDistance">距離（km）</label><input type="number" id="runDistance" min="0.1" step="0.01" placeholder="5.0" required></div>' +
+        '</div>' +
+        '<div class="mini-row">' +
+          '<div class="field"><label for="runMin">時間（分）</label><input type="number" id="runMin" min="0" step="1" placeholder="28" required></div>' +
+          '<div class="field"><label for="runSec">（秒）</label><input type="number" id="runSec" min="0" max="59" step="1" placeholder="30"></div>' +
+        '</div>' +
+        '<div class="field"><label for="runMemo">メモ（任意）</label><textarea id="runMemo" placeholder="コースや天気など"></textarea></div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-ghost" id="runCancel">キャンセル</button>' +
+          '<button type="submit" class="btn btn-primary run-theme">' + (editing ? "更新" : "保存") + '</button>' +
+        '</div>' +
+      '</form>'
+    );
+  }
+
+  function machineFormHtml() {
+    var editing = editingId ? machineDocs.find(function (d) { return d.id === editingId; }) : null;
+    var headingMachine = editing ? editing.machine : selectedMachine;
+    return (
+      '<form class="form-card" id="machineForm">' +
+        '<h2>' + escapeHtml(headingMachine || "マシン") + (editing ? " の記録を編集" : " の記録を追加") + '</h2>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="machineDate">日付</label><input type="date" id="machineDate" required></div>' +
+          '<div class="field"><label for="machineSets">セット数</label><input type="number" id="machineSets" min="1" step="1" value="1"></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="machineWeight">重さ（kg）</label><input type="number" id="machineWeight" min="0" step="2.5" placeholder="40" required></div>' +
+          '<div class="field"><label for="machineReps">回数（回）</label><input type="number" id="machineReps" min="1" step="1" placeholder="15" required></div>' +
+        '</div>' +
+        '<div class="field"><label for="machineMemo">メモ（任意）</label><textarea id="machineMemo" placeholder="フォームのコツなど"></textarea></div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-ghost" id="machineCancel">キャンセル</button>' +
+          '<button type="submit" class="btn btn-primary machine-theme">' + (editing ? "更新" : "保存") + '</button>' +
+        '</div>' +
+      '</form>'
+    );
+  }
+
+  function renderForm() {
+    var host = document.getElementById("formHost");
+    if (!formOpen) { host.innerHTML = ""; return; }
+    if (activeTab === "gym") host.innerHTML = gymFormHtml();
+    else if (activeTab === "run") host.innerHTML = runFormHtml();
+    else host.innerHTML = machineFormHtml();
+
+    if (activeTab === "gym") {
+      var editingGym = editingId ? gymDocs.find(function (d) { return d.id === editingId; }) : null;
+      document.getElementById("gymDate").value = editingGym ? editingGym.date : todayStr();
+      document.getElementById("gymDuration").value = editingGym ? editingGym.duration : "";
+      document.getElementById("gymMenu").value = editingGym ? editingGym.menu : "";
+      document.getElementById("gymMemo").value = editingGym ? (editingGym.memo || "") : "";
+      document.getElementById("gymCancel").addEventListener("click", function () { formOpen = false; editingId = null; render(); });
+      host.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          document.getElementById("gymMenu").value = chip.dataset.chip;
+        });
+      });
+      document.getElementById("gymForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = document.getElementById("gymDate").value;
+        var duration = Number(document.getElementById("gymDuration").value);
+        var menu = document.getElementById("gymMenu").value.trim();
+        var memo = document.getElementById("gymMemo").value.trim();
+        if (!date || !menu || !duration) return;
+        var data = { date: date, duration: duration, menu: menu, memo: memo };
+        if (editingGym) {
+          updateGym(editingGym.id, data);
+        } else {
+          data.createdAt = Date.now();
+          addGym(data);
+        }
+        formOpen = false;
+        editingId = null;
+        render();
+      });
+    } else if (activeTab === "run") {
+      var editingRun = editingId ? runDocs.find(function (d) { return d.id === editingId; }) : null;
+      document.getElementById("runDate").value = editingRun ? editingRun.date : todayStr();
+      document.getElementById("runDistance").value = editingRun ? editingRun.distance : "";
+      if (editingRun) {
+        var wholeMin = Math.floor(editingRun.duration);
+        document.getElementById("runMin").value = wholeMin;
+        document.getElementById("runSec").value = Math.round((editingRun.duration - wholeMin) * 60);
+      } else {
+        document.getElementById("runMin").value = "";
+        document.getElementById("runSec").value = "";
+      }
+      document.getElementById("runMemo").value = editingRun ? (editingRun.memo || "") : "";
+      document.getElementById("runCancel").addEventListener("click", function () { formOpen = false; editingId = null; render(); });
+      document.getElementById("runForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = document.getElementById("runDate").value;
+        var distance = Number(document.getElementById("runDistance").value);
+        var min = Number(document.getElementById("runMin").value) || 0;
+        var sec = Number(document.getElementById("runSec").value) || 0;
+        var duration = min + sec / 60;
+        var memo = document.getElementById("runMemo").value.trim();
+        if (!date || !distance || !duration) return;
+        var data = { date: date, distance: distance, duration: duration, memo: memo };
+        if (editingRun) {
+          updateRun(editingRun.id, data);
+        } else {
+          data.createdAt = Date.now();
+          addRun(data);
+        }
+        formOpen = false;
+        editingId = null;
+        render();
+      });
+    } else {
+      var editingMachine = editingId ? machineDocs.find(function (d) { return d.id === editingId; }) : null;
+      document.getElementById("machineDate").value = editingMachine ? editingMachine.date : todayStr();
+      document.getElementById("machineSets").value = editingMachine ? editingMachine.sets : 1;
+      document.getElementById("machineWeight").value = editingMachine ? editingMachine.weight : "";
+      document.getElementById("machineReps").value = editingMachine ? editingMachine.reps : "";
+      document.getElementById("machineMemo").value = editingMachine ? (editingMachine.memo || "") : "";
+      document.getElementById("machineCancel").addEventListener("click", function () { formOpen = false; editingId = null; render(); });
+      document.getElementById("machineForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = document.getElementById("machineDate").value;
+        var weight = Number(document.getElementById("machineWeight").value);
+        var reps = Number(document.getElementById("machineReps").value);
+        var sets = Number(document.getElementById("machineSets").value) || 1;
+        var memo = document.getElementById("machineMemo").value.trim();
+        if (!date || !weight || !reps) return;
+        var data = { date: date, weight: weight, reps: reps, sets: sets, memo: memo };
+        if (editingMachine) {
+          updateMachine(editingMachine.id, data);
+        } else {
+          if (!selectedMachine) return;
+          data.machine = selectedMachine;
+          data.createdAt = Date.now();
+          addMachine(data);
+        }
+        formOpen = false;
+        editingId = null;
+        render();
+      });
+    }
+  }
+
+  function gymEntryCard(d) {
+    return (
+      '<div class="entry-card gym">' +
+        '<div class="entry-stripe"></div>' +
+        '<div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + escapeHtml(d.date) + '</span><span class="entry-title">' + escapeHtml(d.menu) + '</span></div>' +
+          '<div class="entry-stats"><span><b>' + escapeHtml(d.duration) + '</b> 分</span></div>' +
+          (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+        '</div>' +
+        '<div class="entry-actions">' +
+          '<button class="icon-btn" data-edit="gym:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+          '<button class="icon-btn" data-del="gym:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function runEntryCard(d) {
+    var pace = formatPace(d.duration / d.distance);
+    return (
+      '<div class="entry-card run">' +
+        '<div class="entry-stripe"></div>' +
+        '<div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + escapeHtml(d.date) + '</span><span class="entry-title">' + Number(d.distance).toFixed(2) + ' km</span></div>' +
+          '<div class="entry-stats"><span><b>' + Math.round(d.duration) + '</b> 分</span><span>ペース <b>' + pace + '</b>/km</span></div>' +
+          (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+        '</div>' +
+        '<div class="entry-actions">' +
+          '<button class="icon-btn" data-edit="runs:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+          '<button class="icon-btn" data-del="runs:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function machineEntryCard(bestWeight) {
+    return function (d) {
+      var isBest = Number(d.weight) === bestWeight && bestWeight > 0;
+      return (
+        '<div class="entry-card machine">' +
+          '<div class="entry-stripe"></div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-top"><span class="entry-date">' + escapeHtml(d.date) + '</span><span class="entry-title">' + escapeHtml(d.weight) + 'kg × ' + escapeHtml(d.reps) + '回' + (d.sets > 1 ? ' ×' + escapeHtml(d.sets) + 'セット' : '') + (isBest ? '<span class="best-tag">自己ベスト</span>' : '') + '</span></div>' +
+            (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+          '</div>' +
+          '<div class="entry-actions">' +
+            '<button class="icon-btn" data-edit="machines:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+            '<button class="icon-btn" data-del="machines:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+  }
+
+  function groupedList(docs, cardFn) {
+    var groups = [];
+    var lastMonth = null;
+    docs.forEach(function (d) {
+      var label = monthLabel(d.date);
+      if (label !== lastMonth) {
+        groups.push({ label: label, items: [] });
+        lastMonth = label;
+      }
+      groups[groups.length - 1].items.push(d);
+    });
+    return groups.map(function (g) {
+      return (
+        '<div class="month-group">' +
+          '<div class="month-label">' + escapeHtml(g.label) + '</div>' +
+          g.items.map(cardFn).join("") +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function emptyGym() {
+    return (
+      '<div class="empty-state">' + ICONS.dumbbell +
+        '<p>まだジムの記録がありません。「＋ 記録を追加」からトレーニング内容を残しましょう。</p>' +
+        '<div class="entry-card gym example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">ながらウォーク30分+筋トレ<span class="example-tag">例</span></span></div>' +
+          '<div class="entry-stats"><span><b>45</b> 分</span></div></div></div>' +
+      '</div>'
+    );
+  }
+
+  function emptyRun() {
+    return (
+      '<div class="empty-state">' + ICONS.run +
+        '<p>まだランニングの記録がありません。「＋ 記録を追加」から距離とタイムを残しましょう。</p>' +
+        '<div class="entry-card run example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">5.00 km<span class="example-tag">例</span></span></div>' +
+          '<div class="entry-stats"><span><b>28</b> 分</span><span>ペース <b>5\'36"</b>/km</span></div></div></div>' +
+      '</div>'
+    );
+  }
+
+  function renderEntries() {
+    var host = document.getElementById("entryHost");
+    if (activeTab === "gym") {
+      host.innerHTML = gymDocs.length ? groupedList(gymDocs, gymEntryCard) : emptyGym();
+    } else if (activeTab === "run") {
+      host.innerHTML = runDocs.length ? groupedList(runDocs, runEntryCard) : emptyRun();
+    } else {
+      var records = machineDocs.filter(function (d) { return d.machine === selectedMachine; });
+      if (records.length) {
+        var bestWeight = records.reduce(function (mx, d) { return Math.max(mx, Number(d.weight) || 0); }, 0);
+        host.innerHTML = groupedList(records, machineEntryCard(bestWeight));
+      } else {
+        host.innerHTML = (
+          '<div class="empty-state">' + ICONS.dumbbell +
+            '<p>' + escapeHtml(selectedMachine || "マシン") + ' の記録はまだありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
+            '<div class="entry-card machine example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+              '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">40kg × 15回<span class="example-tag">例</span></span></div></div></div>' +
+          '</div>'
+        );
+      }
+    }
+    host.querySelectorAll("[data-del]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var parts = btn.dataset.del.split(":");
+        removeRecord(parts[0], parts.slice(1).join(":"));
+      });
+    });
+    host.querySelectorAll("[data-edit]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var parts = btn.dataset.edit.split(":");
+        editingId = parts.slice(1).join(":");
+        formOpen = true;
+        render();
+      });
+    });
+  }
+
+  function renderMachinePicker() {
+    var host = document.getElementById("machinePickerHost");
+    if (activeTab !== "machine") { host.innerHTML = ""; return; }
+
+    var options = allMachineOptions();
+    if (!selectedMachine || options.indexOf(selectedMachine) === -1) {
+      selectedMachine = options[0] || null;
+      try { localStorage.setItem("chocozaplog_selected_machine", selectedMachine || ""); } catch (e) {}
+    }
+
+    var chips = options.map(function (m) {
+      var cls = "chip machine-chip" + (m === selectedMachine ? " active" : "");
+      return '<button type="button" class="' + cls + '" data-machine="' + escapeHtml(m) + '">' + escapeHtml(m) + '</button>';
+    }).join("");
+
+    var customInputHtml = customInputOpen
+      ? '<span class="custom-input-row"><input type="text" id="customMachineInput" placeholder="マシン名"><button type="button" class="btn btn-ghost" id="customMachineAdd">追加</button></span>'
+      : "";
+
+    var records = machineDocs.filter(function (d) { return d.machine === selectedMachine; });
+    sortDesc(records);
+    var last = records[0];
+    var bestWeight = records.reduce(function (mx, d) { return Math.max(mx, Number(d.weight) || 0); }, 0);
+
+    var summaryHtml = selectedMachine ? (
+      '<div class="machine-summary">' +
+        '<div class="machine-summary-name">' + escapeHtml(selectedMachine) + '</div>' +
+        (last
+          ? '<div class="machine-summary-last">前回: <b>' + escapeHtml(last.weight) + 'kg</b> × <b>' + escapeHtml(last.reps) + '回</b>' + (last.sets > 1 ? ' ×' + escapeHtml(last.sets) + 'セット' : '') + ' <span>(' + escapeHtml(last.date) + ')</span></div>'
+          : '<div class="machine-summary-last">まだ記録がありません</div>') +
+        (bestWeight ? '<div class="machine-summary-best">自己ベスト <b>' + bestWeight + 'kg</b></div>' : "") +
+      '</div>'
+    ) : "";
+
+    host.innerHTML =
+      '<div class="machine-picker">' + chips +
+        '<button type="button" class="chip chip-add" id="machineCustomBtn">＋ その他</button>' +
+        customInputHtml +
+      '</div>' + summaryHtml;
+
+    host.querySelectorAll(".machine-chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        selectedMachine = chip.dataset.machine;
+        try { localStorage.setItem("chocozaplog_selected_machine", selectedMachine); } catch (e) {}
+        formOpen = false;
+        editingId = null;
+        customInputOpen = false;
+        render();
+      });
+    });
+
+    document.getElementById("machineCustomBtn").addEventListener("click", function () {
+      customInputOpen = !customInputOpen;
+      render();
+    });
+
+    if (customInputOpen) {
+      var input = document.getElementById("customMachineInput");
+      input.focus();
+      var commit = function () {
+        var name = input.value.trim();
+        if (name) {
+          try {
+            var customs = JSON.parse(localStorage.getItem("chocozaplog_custom_machines") || "[]");
+            if (customs.indexOf(name) === -1) {
+              customs.push(name);
+              localStorage.setItem("chocozaplog_custom_machines", JSON.stringify(customs));
+            }
+          } catch (e) {}
+          selectedMachine = name;
+          try { localStorage.setItem("chocozaplog_selected_machine", selectedMachine); } catch (e) {}
+        }
+        customInputOpen = false;
+        render();
+      };
+      document.getElementById("customMachineAdd").addEventListener("click", commit);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+      });
+    }
+  }
+
+  function renderModeNote() {
+    var note = document.getElementById("modeNote");
+    if (mode === "local") {
+      note.hidden = false;
+      note.textContent = "このブラウザのみに保存";
+    } else {
+      note.hidden = true;
+    }
+  }
+
+  function render() {
+    renderStats();
+    renderTabs();
+    renderMachinePicker();
+    renderForm();
+    renderEntries();
+    renderModeNote();
+  }
+
+  document.getElementById("tabGymBtn").addEventListener("click", function () { activeTab = "gym"; formOpen = false; editingId = null; render(); });
+  document.getElementById("tabRunBtn").addEventListener("click", function () { activeTab = "run"; formOpen = false; editingId = null; render(); });
+  document.getElementById("tabMachineBtn").addEventListener("click", function () { activeTab = "machine"; formOpen = false; editingId = null; customInputOpen = false; render(); });
+  document.getElementById("addToggleBtn").addEventListener("click", function () {
+    formOpen = !formOpen;
+    if (formOpen) editingId = null;
+    render();
+  });
+
+  render();
+  initData();
+})();
+</script>
