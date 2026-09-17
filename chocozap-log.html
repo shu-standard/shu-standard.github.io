@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>チョコザップログ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -565,6 +570,8 @@
     * { transition: none !important; }
   }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="top">
@@ -593,10 +600,28 @@
 
   <section class="entry-list" id="entryHost" aria-live="polite"></section>
 
-  <footer>記録はこのページに保存され、あなただけが見られます。</footer>
+  <footer>記録はクラウドに保存され、このページのURLを知っている人からは読み書きできます。</footer>
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+    onSnapshot, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  import {
+    getAuth, signInAnonymously, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyDnpadQXe0UZWlUUNkxibOIbQwJXXwpj-A",
+    authDomain: "chocozap-log.firebaseapp.com",
+    projectId: "chocozap-log",
+    storageBucket: "chocozap-log.firebasestorage.app",
+    messagingSenderId: "582766373182",
+    appId: "1:582766373182:web:e733bbfd813974420e246f"
+  };
+
 (function () {
   "use strict";
 
@@ -620,7 +645,7 @@
   var gymDocs = [];
   var runDocs = [];
   var machineDocs = [];
-  var db = null;
+  var firestoreDb = null;
   var mode = "loading";
   var activeTab = "gym";
   var formOpen = false;
@@ -666,27 +691,60 @@
     arr.sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0); });
   }
 
-  async function initData() {
-    try {
-      db = await window.claude.use("db");
-    } catch (e) {
-      db = null;
+  function subscribeCollection(name, cb) {
+    var q = query(collection(firestoreDb, name), orderBy("date", "desc"));
+    onSnapshot(q, function (snap) {
+      var docs = [];
+      snap.forEach(function (d) { docs.push(Object.assign({ id: d.id }, d.data())); });
+      cb(docs);
+    }, function (err) { console.error(name + " snapshot error", err); });
+  }
+
+  function sleep(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  async function signInWithRetry(auth, attempts) {
+    var lastErr = null;
+    for (var i = 0; i < attempts; i++) {
+      try {
+        await new Promise(function (resolve, reject) {
+          var timeout = setTimeout(function () { reject(new Error("auth timeout")); }, 8000);
+          var unsub = onAuthStateChanged(auth, function (user) {
+            if (user) { clearTimeout(timeout); unsub(); resolve(); }
+          });
+          signInAnonymously(auth).catch(function (err) { clearTimeout(timeout); reject(err); });
+        });
+        return true;
+      } catch (e) {
+        lastErr = e;
+        if (i < attempts - 1) await sleep(600 * (i + 1));
+      }
     }
+    throw lastErr;
+  }
+
+  async function initFirebase() {
+    try {
+      var app = initializeApp(firebaseConfig);
+      var auth = getAuth(app);
+      firestoreDb = getFirestore(app);
+      await signInWithRetry(auth, 3);
+      return true;
+    } catch (e) {
+      console.error("Firebase init failed", e);
+      return false;
+    }
+  }
+
+  async function initData() {
     try { selectedMachine = localStorage.getItem("chocozaplog_selected_machine") || null; } catch (e) {}
-    if (db) {
-      mode = "db";
-      db.collection("gym").orderBy("date", "desc").onSnapshot(function (snap) {
-        gymDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-        render();
-      }, function (err) { console.error("gym snapshot error", err); });
-      db.collection("runs").orderBy("date", "desc").onSnapshot(function (snap) {
-        runDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-        render();
-      }, function (err) { console.error("runs snapshot error", err); });
-      db.collection("machines").orderBy("date", "desc").onSnapshot(function (snap) {
-        machineDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-        render();
-      }, function (err) { console.error("machines snapshot error", err); });
+    var ok = await initFirebase();
+    if (ok) {
+      mode = "firebase";
+      subscribeCollection("gym", function (docs) { gymDocs = docs; render(); });
+      subscribeCollection("runs", function (docs) { runDocs = docs; render(); });
+      subscribeCollection("machines", function (docs) { machineDocs = docs; render(); });
     } else {
       mode = "local";
       try { gymDocs = JSON.parse(localStorage.getItem("chocozaplog_gym") || "[]"); } catch (e) { gymDocs = []; }
@@ -700,8 +758,8 @@
   }
 
   async function addGym(data) {
-    if (mode === "db") {
-      await db.collection("gym").add(data);
+    if (mode === "firebase") {
+      await addDoc(collection(firestoreDb, "gym"), data);
     } else {
       gymDocs.unshift(Object.assign({ id: "g_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
       sortDesc(gymDocs);
@@ -711,8 +769,8 @@
   }
 
   async function addRun(data) {
-    if (mode === "db") {
-      await db.collection("runs").add(data);
+    if (mode === "firebase") {
+      await addDoc(collection(firestoreDb, "runs"), data);
     } else {
       runDocs.unshift(Object.assign({ id: "r_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
       sortDesc(runDocs);
@@ -722,8 +780,8 @@
   }
 
   async function addMachine(data) {
-    if (mode === "db") {
-      await db.collection("machines").add(data);
+    if (mode === "firebase") {
+      await addDoc(collection(firestoreDb, "machines"), data);
     } else {
       machineDocs.unshift(Object.assign({ id: "m_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
       sortDesc(machineDocs);
@@ -733,8 +791,8 @@
   }
 
   async function updateGym(id, data) {
-    if (mode === "db") {
-      await db.collection("gym").doc(id).update(data);
+    if (mode === "firebase") {
+      await updateDoc(doc(firestoreDb, "gym", id), data);
     } else {
       var idx = gymDocs.findIndex(function (d) { return d.id === id; });
       if (idx !== -1) gymDocs[idx] = Object.assign({}, gymDocs[idx], data);
@@ -745,8 +803,8 @@
   }
 
   async function updateRun(id, data) {
-    if (mode === "db") {
-      await db.collection("runs").doc(id).update(data);
+    if (mode === "firebase") {
+      await updateDoc(doc(firestoreDb, "runs", id), data);
     } else {
       var idx = runDocs.findIndex(function (d) { return d.id === id; });
       if (idx !== -1) runDocs[idx] = Object.assign({}, runDocs[idx], data);
@@ -757,8 +815,8 @@
   }
 
   async function updateMachine(id, data) {
-    if (mode === "db") {
-      await db.collection("machines").doc(id).update(data);
+    if (mode === "firebase") {
+      await updateDoc(doc(firestoreDb, "machines", id), data);
     } else {
       var idx = machineDocs.findIndex(function (d) { return d.id === id; });
       if (idx !== -1) machineDocs[idx] = Object.assign({}, machineDocs[idx], data);
@@ -770,8 +828,8 @@
 
   async function removeRecord(type, id) {
     if (!window.confirm("この記録を削除しますか？")) return;
-    if (mode === "db") {
-      await db.collection(type).doc(id).delete();
+    if (mode === "firebase") {
+      await deleteDoc(doc(firestoreDb, type, id));
     } else {
       if (type === "gym") gymDocs = gymDocs.filter(function (d) { return d.id !== id; });
       else if (type === "runs") runDocs = runDocs.filter(function (d) { return d.id !== id; });
@@ -1272,3 +1330,5 @@
   initData();
 })();
 </script>
+</body>
+</html>
