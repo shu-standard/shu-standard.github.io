@@ -455,6 +455,34 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    width: fit-content;
+  }
+
+  .view-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .view-toggle-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
   .entry-main { flex: 1; min-width: 0; }
 
   .entry-top {
@@ -652,6 +680,7 @@
   var selectedMachine = null;
   var customInputOpen = false;
   var editingId = null;
+  var machineListMode = "machine";
 
   function todayStr() {
     var d = new Date();
@@ -1157,6 +1186,64 @@
     }).join("");
   }
 
+  function dayLabel(dateStr) {
+    var parts = (dateStr || "").split("-");
+    if (parts.length < 3) return dateStr || "その他";
+    var d = new Date(parts[0] + "-" + parts[1] + "-" + parts[2] + "T00:00:00");
+    var week = ["日", "月", "火", "水", "木", "金", "土"][d.getDay()];
+    return parseInt(parts[1], 10) + "月" + parseInt(parts[2], 10) + "日(" + week + ")";
+  }
+
+  function groupedByDay(docs, cardFn) {
+    var groups = [];
+    var lastDate = null;
+    docs.forEach(function (d) {
+      if (d.date !== lastDate) {
+        groups.push({ date: d.date, items: [] });
+        lastDate = d.date;
+      }
+      groups[groups.length - 1].items.push(d);
+    });
+    return groups.map(function (g) {
+      return (
+        '<div class="month-group">' +
+          '<div class="month-label">' + escapeHtml(dayLabel(g.date)) + '</div>' +
+          g.items.map(cardFn).join("") +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function computeBestWeights() {
+    var map = {};
+    machineDocs.forEach(function (d) {
+      var w = Number(d.weight) || 0;
+      if (!map[d.machine] || w > map[d.machine]) map[d.machine] = w;
+    });
+    return map;
+  }
+
+  function dayEntryCard(bestMap) {
+    return function (d) {
+      var best = bestMap[d.machine] || 0;
+      var isBest = Number(d.weight) === best && best > 0;
+      return (
+        '<div class="entry-card machine">' +
+          '<div class="entry-stripe"></div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-top"><span class="entry-title">' + escapeHtml(d.machine) + '</span></div>' +
+            '<div class="entry-stats"><span><b>' + escapeHtml(d.weight) + '</b>kg × <b>' + escapeHtml(d.reps) + '</b>回' + (d.sets > 1 ? ' ×' + escapeHtml(d.sets) + 'セット' : '') + '</span>' + (isBest ? '<span class="best-tag">自己ベスト</span>' : '') + '</div>' +
+            (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+          '</div>' +
+          '<div class="entry-actions">' +
+            '<button class="icon-btn" data-edit="machines:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+            '<button class="icon-btn" data-del="machines:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+  }
+
   function emptyGym() {
     return (
       '<div class="empty-state">' + ICONS.dumbbell +
@@ -1185,6 +1272,16 @@
       host.innerHTML = gymDocs.length ? groupedList(gymDocs, gymEntryCard) : emptyGym();
     } else if (activeTab === "run") {
       host.innerHTML = runDocs.length ? groupedList(runDocs, runEntryCard) : emptyRun();
+    } else if (machineListMode === "day") {
+      if (machineDocs.length) {
+        host.innerHTML = groupedByDay(machineDocs, dayEntryCard(computeBestWeights()));
+      } else {
+        host.innerHTML = (
+          '<div class="empty-state">' + ICONS.dumbbell +
+            '<p>まだマシンの記録がありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
+          '</div>'
+        );
+      }
     } else {
       var records = machineDocs.filter(function (d) { return d.machine === selectedMachine; });
       if (records.length) {
@@ -1250,11 +1347,24 @@
       '</div>'
     ) : "";
 
+    var toggleHtml =
+      '<div class="view-toggle">' +
+        '<button type="button" class="view-toggle-btn' + (machineListMode === "machine" ? " active" : "") + '" data-view="machine">選択中のマシン</button>' +
+        '<button type="button" class="view-toggle-btn' + (machineListMode === "day" ? " active" : "") + '" data-view="day">日付でまとめて表示</button>' +
+      '</div>';
+
     host.innerHTML =
       '<div class="machine-picker">' + chips +
         '<button type="button" class="chip chip-add" id="machineCustomBtn">＋ その他</button>' +
         customInputHtml +
-      '</div>' + summaryHtml;
+      '</div>' + summaryHtml + toggleHtml;
+
+    host.querySelectorAll(".view-toggle-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        machineListMode = btn.dataset.view;
+        render();
+      });
+    });
 
     host.querySelectorAll(".machine-chip").forEach(function (chip) {
       chip.addEventListener("click", function () {
