@@ -22,6 +22,10 @@
     --gym-soft: #eef8cf;
     --machine: #8452d8;
     --machine-soft: #efe7fb;
+    --home: #d9812f;
+    --home-soft: #faf0e2;
+    --stretch: #1f9e8a;
+    --stretch-soft: #e4f6f2;
     --danger: #d94b4b;
     --danger-soft: #fbe7e6;
     --shadow: 0 1px 2px rgba(20, 24, 12, 0.04), 0 6px 16px rgba(20, 24, 12, 0.05);
@@ -45,6 +49,10 @@
       --gym-soft: #26301496;
       --machine: #b79dfb;
       --machine-soft: #2a2140;
+      --home: #ffb066;
+      --home-soft: #3a2a17;
+      --stretch: #5fd6bf;
+      --stretch-soft: #163732;
       --danger: #ff8a8a;
       --danger-soft: #3a1f1f;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.35);
@@ -65,6 +73,10 @@
     --gym-soft: #26301496;
     --machine: #b79dfb;
     --machine-soft: #2a2140;
+    --home: #ffb066;
+    --home-soft: #3a2a17;
+    --stretch: #5fd6bf;
+    --stretch-soft: #163732;
     --danger: #ff8a8a;
     --danger-soft: #3a1f1f;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.35);
@@ -181,10 +193,12 @@
     border: 1px solid var(--line);
     border-radius: 999px;
     padding: 4px;
+    overflow-x: auto;
   }
 
   .tab-btn {
-    flex: 1;
+    flex: 0 0 auto;
+    white-space: nowrap;
     border: none;
     background: transparent;
     color: var(--text-muted);
@@ -215,6 +229,8 @@
   .tab-btn.gym .dot { background: var(--accent); }
   .tab-btn.run .dot { background: var(--run); }
   .tab-btn.machine .dot { background: var(--machine); }
+  .tab-btn.home .dot { background: var(--home); }
+  .tab-btn.stretch .dot { background: var(--stretch); }
 
   .add-row {
     display: flex;
@@ -254,6 +270,16 @@
 
   .btn-primary.machine-theme {
     background: var(--machine);
+    color: #fff;
+  }
+
+  .btn-primary.home-theme {
+    background: var(--home);
+    color: #fff;
+  }
+
+  .btn-primary.stretch-theme {
+    background: var(--stretch);
     color: #fff;
   }
 
@@ -388,6 +414,8 @@
   .entry-card.gym .entry-stripe { background: var(--accent); }
   .entry-card.run .entry-stripe { background: var(--run); }
   .entry-card.machine .entry-stripe { background: var(--machine); }
+  .entry-card.home .entry-stripe { background: var(--home); }
+  .entry-card.stretch .entry-stripe { background: var(--stretch); }
 
   .best-tag {
     font-size: 10px;
@@ -605,7 +633,7 @@
   <header class="top">
     <div class="titles">
       <h1 class="display">チョコザップログ</h1>
-      <p>マシントレーニングとランニングをまとめて記録</p>
+      <p>運動とストレッチの記録をまとめて管理</p>
     </div>
     <span class="mode-note" id="modeNote" hidden></span>
   </header>
@@ -616,9 +644,12 @@
     <button class="tab-btn gym" id="tabGymBtn" role="tab"><span class="dot"></span>ジム記録</button>
     <button class="tab-btn run" id="tabRunBtn" role="tab"><span class="dot"></span>ラン</button>
     <button class="tab-btn machine" id="tabMachineBtn" role="tab"><span class="dot"></span>マシン</button>
+    <button class="tab-btn home" id="tabHomeBtn" role="tab"><span class="dot"></span>家トレ</button>
+    <button class="tab-btn stretch" id="tabStretchBtn" role="tab"><span class="dot"></span>ストレッチ</button>
   </nav>
 
   <div id="machinePickerHost"></div>
+  <div id="homePickerHost"></div>
 
   <div class="add-row">
     <button class="btn btn-primary" id="addToggleBtn">＋ 記録を追加</button>
@@ -659,7 +690,9 @@
     flame: '<svg class="icon streak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3-3 4-3 7.5A3.5 3.5 0 0 0 12 13a2 2 0 0 0 2-2c1.2.9 2 2.4 2 4a4 4 0 0 1-8 0c0-3 1.5-4.5 2-6 .3-1 .2-2-1-2.5C10 4.5 11 3 12 2z"/></svg>',
     calendar: '<svg class="icon total" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>',
-    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+    home: '<svg class="icon home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2"/><path d="M6.5 8.5 17 15M9 10l6 8M6.5 8.5 4 13M17 15l4 2M17 15l1-5"/></svg>',
+    stretch: '<svg class="icon stretch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v7M12 9l-5-3M12 9l5-3M12 13l-4 7M12 13l4 7"/></svg>'
   };
 
   var GYM_CHIPS = ["筋トレ", "ながらウォーク", "エアロバイク", "AIストレッチ", "セルフエステ", "ヨガ"];
@@ -670,17 +703,26 @@
     "⑨アブダクション", "⑩アダクション"
   ];
 
+  var HOME_EXERCISES = ["腕立て伏せ", "腹筋", "背筋", "スクワット"];
+
+  var STRETCH_CHIPS = ["肩甲骨", "股関節", "ハムストリング", "背中", "全身"];
+
   var gymDocs = [];
   var runDocs = [];
   var machineDocs = [];
+  var homeDocs = [];
+  var stretchDocs = [];
   var firestoreDb = null;
   var mode = "loading";
   var activeTab = "gym";
   var formOpen = false;
   var selectedMachine = null;
+  var selectedHome = null;
   var customInputOpen = false;
+  var customHomeInputOpen = false;
   var editingId = null;
   var machineListMode = "machine";
+  var homeListMode = "exercise";
 
   function todayStr() {
     var d = new Date();
@@ -699,6 +741,8 @@
       localStorage.setItem("chocozaplog_gym", JSON.stringify(gymDocs));
       localStorage.setItem("chocozaplog_runs", JSON.stringify(runDocs));
       localStorage.setItem("chocozaplog_machines", JSON.stringify(machineDocs));
+      localStorage.setItem("chocozaplog_home", JSON.stringify(homeDocs));
+      localStorage.setItem("chocozaplog_stretch", JSON.stringify(stretchDocs));
     } catch (e) {}
   }
 
@@ -713,6 +757,20 @@
       JSON.parse(localStorage.getItem("chocozaplog_custom_machines") || "[]").forEach(add);
     } catch (e) {}
     machineDocs.forEach(function (d) { add(d.machine); });
+    return list;
+  }
+
+  function allHomeOptions() {
+    var seen = {};
+    var list = [];
+    function add(name) {
+      if (name && !seen[name]) { seen[name] = true; list.push(name); }
+    }
+    HOME_EXERCISES.forEach(add);
+    try {
+      JSON.parse(localStorage.getItem("chocozaplog_custom_home") || "[]").forEach(add);
+    } catch (e) {}
+    homeDocs.forEach(function (d) { add(d.exercise); });
     return list;
   }
 
@@ -768,20 +826,27 @@
 
   async function initData() {
     try { selectedMachine = localStorage.getItem("chocozaplog_selected_machine") || null; } catch (e) {}
+    try { selectedHome = localStorage.getItem("chocozaplog_selected_home") || null; } catch (e) {}
     var ok = await initFirebase();
     if (ok) {
       mode = "firebase";
       subscribeCollection("gym", function (docs) { gymDocs = docs; render(); });
       subscribeCollection("runs", function (docs) { runDocs = docs; render(); });
       subscribeCollection("machines", function (docs) { machineDocs = docs; render(); });
+      subscribeCollection("home", function (docs) { homeDocs = docs; render(); });
+      subscribeCollection("stretch", function (docs) { stretchDocs = docs; render(); });
     } else {
       mode = "local";
       try { gymDocs = JSON.parse(localStorage.getItem("chocozaplog_gym") || "[]"); } catch (e) { gymDocs = []; }
       try { runDocs = JSON.parse(localStorage.getItem("chocozaplog_runs") || "[]"); } catch (e) { runDocs = []; }
       try { machineDocs = JSON.parse(localStorage.getItem("chocozaplog_machines") || "[]"); } catch (e) { machineDocs = []; }
+      try { homeDocs = JSON.parse(localStorage.getItem("chocozaplog_home") || "[]"); } catch (e) { homeDocs = []; }
+      try { stretchDocs = JSON.parse(localStorage.getItem("chocozaplog_stretch") || "[]"); } catch (e) { stretchDocs = []; }
       sortDesc(gymDocs);
       sortDesc(runDocs);
       sortDesc(machineDocs);
+      sortDesc(homeDocs);
+      sortDesc(stretchDocs);
     }
     render();
   }
@@ -814,6 +879,28 @@
     } else {
       machineDocs.unshift(Object.assign({ id: "m_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
       sortDesc(machineDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function addHome(data) {
+    if (mode === "firebase") {
+      await addDoc(collection(firestoreDb, "home"), data);
+    } else {
+      homeDocs.unshift(Object.assign({ id: "h_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
+      sortDesc(homeDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function addStretch(data) {
+    if (mode === "firebase") {
+      await addDoc(collection(firestoreDb, "stretch"), data);
+    } else {
+      stretchDocs.unshift(Object.assign({ id: "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7) }, data));
+      sortDesc(stretchDocs);
       saveLocal();
       render();
     }
@@ -855,6 +942,30 @@
     }
   }
 
+  async function updateHome(id, data) {
+    if (mode === "firebase") {
+      await updateDoc(doc(firestoreDb, "home", id), data);
+    } else {
+      var idx = homeDocs.findIndex(function (d) { return d.id === id; });
+      if (idx !== -1) homeDocs[idx] = Object.assign({}, homeDocs[idx], data);
+      sortDesc(homeDocs);
+      saveLocal();
+      render();
+    }
+  }
+
+  async function updateStretch(id, data) {
+    if (mode === "firebase") {
+      await updateDoc(doc(firestoreDb, "stretch", id), data);
+    } else {
+      var idx = stretchDocs.findIndex(function (d) { return d.id === id; });
+      if (idx !== -1) stretchDocs[idx] = Object.assign({}, stretchDocs[idx], data);
+      sortDesc(stretchDocs);
+      saveLocal();
+      render();
+    }
+  }
+
   async function removeRecord(type, id) {
     if (!window.confirm("この記録を削除しますか？")) return;
     if (mode === "firebase") {
@@ -863,6 +974,8 @@
       if (type === "gym") gymDocs = gymDocs.filter(function (d) { return d.id !== id; });
       else if (type === "runs") runDocs = runDocs.filter(function (d) { return d.id !== id; });
       else if (type === "machines") machineDocs = machineDocs.filter(function (d) { return d.id !== id; });
+      else if (type === "home") homeDocs = homeDocs.filter(function (d) { return d.id !== id; });
+      else if (type === "stretch") stretchDocs = stretchDocs.filter(function (d) { return d.id !== id; });
       saveLocal();
       render();
     }
@@ -893,6 +1006,8 @@
     gymDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
     runDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
     machineDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
+    homeDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
+    stretchDocs.forEach(function (d) { if (d.date) dateSet[d.date] = true; });
     var totalDays = Object.keys(dateSet).length;
 
     var streak = 0;
@@ -932,12 +1047,16 @@
     var gymBtn = document.getElementById("tabGymBtn");
     var runBtn = document.getElementById("tabRunBtn");
     var machineBtn = document.getElementById("tabMachineBtn");
+    var homeBtn = document.getElementById("tabHomeBtn");
+    var stretchBtn = document.getElementById("tabStretchBtn");
     gymBtn.setAttribute("aria-selected", String(activeTab === "gym"));
     runBtn.setAttribute("aria-selected", String(activeTab === "run"));
     machineBtn.setAttribute("aria-selected", String(activeTab === "machine"));
+    homeBtn.setAttribute("aria-selected", String(activeTab === "home"));
+    stretchBtn.setAttribute("aria-selected", String(activeTab === "stretch"));
     var addBtn = document.getElementById("addToggleBtn");
-    var theme = activeTab === "run" ? " run-theme" : activeTab === "machine" ? " machine-theme" : "";
-    addBtn.className = "btn btn-primary" + theme;
+    var themes = { run: " run-theme", machine: " machine-theme", home: " home-theme", stretch: " stretch-theme" };
+    addBtn.className = "btn btn-primary" + (themes[activeTab] || "");
   }
 
   function gymFormHtml() {
@@ -1008,12 +1127,57 @@
     );
   }
 
+  function homeFormHtml() {
+    var editing = editingId ? homeDocs.find(function (d) { return d.id === editingId; }) : null;
+    var headingExercise = editing ? editing.exercise : selectedHome;
+    return (
+      '<form class="form-card" id="homeForm">' +
+        '<h2>' + escapeHtml(headingExercise || "家トレ") + (editing ? " の記録を編集" : " の記録を追加") + '</h2>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="homeDate">日付</label><input type="date" id="homeDate" required></div>' +
+          '<div class="field"><label for="homeSets">セット数</label><input type="number" id="homeSets" min="1" step="1" value="1"></div>' +
+        '</div>' +
+        '<div class="field"><label for="homeReps">回数（回）</label><input type="number" id="homeReps" min="1" step="1" placeholder="20" required></div>' +
+        '<div class="field"><label for="homeMemo">メモ（任意）</label><textarea id="homeMemo" placeholder="フォームのコツなど"></textarea></div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-ghost" id="homeCancel">キャンセル</button>' +
+          '<button type="submit" class="btn btn-primary home-theme">' + (editing ? "更新" : "保存") + '</button>' +
+        '</div>' +
+      '</form>'
+    );
+  }
+
+  function stretchFormHtml() {
+    var editing = editingId ? stretchDocs.find(function (d) { return d.id === editingId; }) : null;
+    var chips = STRETCH_CHIPS.map(function (c) {
+      return '<button type="button" class="chip" data-chip="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>';
+    }).join("");
+    return (
+      '<form class="form-card" id="stretchForm">' +
+        '<h2>' + (editing ? "ストレッチ記録を編集" : "ストレッチ記録を追加") + '</h2>' +
+        '<div class="field-row">' +
+          '<div class="field"><label for="stretchDate">日付</label><input type="date" id="stretchDate" required></div>' +
+          '<div class="field"><label for="stretchDuration">時間（分）</label><input type="number" id="stretchDuration" min="1" step="1" placeholder="10" required></div>' +
+        '</div>' +
+        '<div class="field"><label for="stretchPart">部位・内容</label><input type="text" id="stretchPart" placeholder="例：肩甲骨まわり" required></div>' +
+        '<div class="chip-row">' + chips + '</div>' +
+        '<div class="field"><label for="stretchMemo">メモ（任意）</label><textarea id="stretchMemo" placeholder="体の状態など"></textarea></div>' +
+        '<div class="form-actions">' +
+          '<button type="button" class="btn btn-ghost" id="stretchCancel">キャンセル</button>' +
+          '<button type="submit" class="btn btn-primary stretch-theme">' + (editing ? "更新" : "保存") + '</button>' +
+        '</div>' +
+      '</form>'
+    );
+  }
+
   function renderForm() {
     var host = document.getElementById("formHost");
     if (!formOpen) { host.innerHTML = ""; return; }
     if (activeTab === "gym") host.innerHTML = gymFormHtml();
     else if (activeTab === "run") host.innerHTML = runFormHtml();
-    else host.innerHTML = machineFormHtml();
+    else if (activeTab === "machine") host.innerHTML = machineFormHtml();
+    else if (activeTab === "home") host.innerHTML = homeFormHtml();
+    else host.innerHTML = stretchFormHtml();
 
     if (activeTab === "gym") {
       var editingGym = editingId ? gymDocs.find(function (d) { return d.id === editingId; }) : null;
@@ -1079,7 +1243,7 @@
         editingId = null;
         render();
       });
-    } else {
+    } else if (activeTab === "machine") {
       var editingMachine = editingId ? machineDocs.find(function (d) { return d.id === editingId; }) : null;
       document.getElementById("machineDate").value = editingMachine ? editingMachine.date : todayStr();
       document.getElementById("machineSets").value = editingMachine ? editingMachine.sets : 1;
@@ -1103,6 +1267,63 @@
           data.machine = selectedMachine;
           data.createdAt = Date.now();
           addMachine(data);
+        }
+        formOpen = false;
+        editingId = null;
+        render();
+      });
+    } else if (activeTab === "home") {
+      var editingHome = editingId ? homeDocs.find(function (d) { return d.id === editingId; }) : null;
+      document.getElementById("homeDate").value = editingHome ? editingHome.date : todayStr();
+      document.getElementById("homeSets").value = editingHome ? editingHome.sets : 1;
+      document.getElementById("homeReps").value = editingHome ? editingHome.reps : "";
+      document.getElementById("homeMemo").value = editingHome ? (editingHome.memo || "") : "";
+      document.getElementById("homeCancel").addEventListener("click", function () { formOpen = false; editingId = null; render(); });
+      document.getElementById("homeForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = document.getElementById("homeDate").value;
+        var reps = Number(document.getElementById("homeReps").value);
+        var sets = Number(document.getElementById("homeSets").value) || 1;
+        var memo = document.getElementById("homeMemo").value.trim();
+        if (!date || !reps) return;
+        var data = { date: date, reps: reps, sets: sets, memo: memo };
+        if (editingHome) {
+          updateHome(editingHome.id, data);
+        } else {
+          if (!selectedHome) return;
+          data.exercise = selectedHome;
+          data.createdAt = Date.now();
+          addHome(data);
+        }
+        formOpen = false;
+        editingId = null;
+        render();
+      });
+    } else {
+      var editingStretch = editingId ? stretchDocs.find(function (d) { return d.id === editingId; }) : null;
+      document.getElementById("stretchDate").value = editingStretch ? editingStretch.date : todayStr();
+      document.getElementById("stretchDuration").value = editingStretch ? editingStretch.duration : "";
+      document.getElementById("stretchPart").value = editingStretch ? editingStretch.part : "";
+      document.getElementById("stretchMemo").value = editingStretch ? (editingStretch.memo || "") : "";
+      document.getElementById("stretchCancel").addEventListener("click", function () { formOpen = false; editingId = null; render(); });
+      host.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          document.getElementById("stretchPart").value = chip.dataset.chip;
+        });
+      });
+      document.getElementById("stretchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = document.getElementById("stretchDate").value;
+        var duration = Number(document.getElementById("stretchDuration").value);
+        var part = document.getElementById("stretchPart").value.trim();
+        var memo = document.getElementById("stretchMemo").value.trim();
+        if (!date || !part || !duration) return;
+        var data = { date: date, duration: duration, part: part, memo: memo };
+        if (editingStretch) {
+          updateStretch(editingStretch.id, data);
+        } else {
+          data.createdAt = Date.now();
+          addStretch(data);
         }
         formOpen = false;
         editingId = null;
@@ -1163,6 +1384,42 @@
         '</div>'
       );
     };
+  }
+
+  function homeEntryCard(bestReps) {
+    return function (d) {
+      var isBest = Number(d.reps) === bestReps && bestReps > 0;
+      return (
+        '<div class="entry-card home">' +
+          '<div class="entry-stripe"></div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-top"><span class="entry-date">' + escapeHtml(d.date) + '</span><span class="entry-title">' + escapeHtml(d.reps) + '回' + (d.sets > 1 ? ' ×' + escapeHtml(d.sets) + 'セット' : '') + (isBest ? '<span class="best-tag">自己ベスト</span>' : '') + '</span></div>' +
+            (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+          '</div>' +
+          '<div class="entry-actions">' +
+            '<button class="icon-btn" data-edit="home:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+            '<button class="icon-btn" data-del="home:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+  }
+
+  function stretchEntryCard(d) {
+    return (
+      '<div class="entry-card stretch">' +
+        '<div class="entry-stripe"></div>' +
+        '<div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + escapeHtml(d.date) + '</span><span class="entry-title">' + escapeHtml(d.part) + '</span></div>' +
+          '<div class="entry-stats"><span><b>' + escapeHtml(d.duration) + '</b> 分</span></div>' +
+          (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+        '</div>' +
+        '<div class="entry-actions">' +
+          '<button class="icon-btn" data-edit="stretch:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+          '<button class="icon-btn" data-del="stretch:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+        '</div>' +
+      '</div>'
+    );
   }
 
   function groupedList(docs, cardFn) {
@@ -1244,6 +1501,36 @@
     };
   }
 
+  function computeBestReps() {
+    var map = {};
+    homeDocs.forEach(function (d) {
+      var r = Number(d.reps) || 0;
+      if (!map[d.exercise] || r > map[d.exercise]) map[d.exercise] = r;
+    });
+    return map;
+  }
+
+  function dayEntryCardHome(bestMap) {
+    return function (d) {
+      var best = bestMap[d.exercise] || 0;
+      var isBest = Number(d.reps) === best && best > 0;
+      return (
+        '<div class="entry-card home">' +
+          '<div class="entry-stripe"></div>' +
+          '<div class="entry-main">' +
+            '<div class="entry-top"><span class="entry-title">' + escapeHtml(d.exercise) + '</span></div>' +
+            '<div class="entry-stats"><span><b>' + escapeHtml(d.reps) + '</b>回' + (d.sets > 1 ? ' ×' + escapeHtml(d.sets) + 'セット' : '') + '</span>' + (isBest ? '<span class="best-tag">自己ベスト</span>' : '') + '</div>' +
+            (d.memo ? '<div class="entry-memo">' + escapeHtml(d.memo) + '</div>' : '') +
+          '</div>' +
+          '<div class="entry-actions">' +
+            '<button class="icon-btn" data-edit="home:' + d.id + '" aria-label="編集">' + ICONS.edit + '</button>' +
+            '<button class="icon-btn" data-del="home:' + d.id + '" aria-label="削除">' + ICONS.trash + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+  }
+
   function emptyGym() {
     return (
       '<div class="empty-state">' + ICONS.dumbbell +
@@ -1266,36 +1553,77 @@
     );
   }
 
+  function emptyStretch() {
+    return (
+      '<div class="empty-state">' + ICONS.stretch +
+        '<p>まだストレッチの記録がありません。「＋ 記録を追加」から部位と時間を残しましょう。</p>' +
+        '<div class="entry-card stretch example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+          '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">肩甲骨まわり<span class="example-tag">例</span></span></div>' +
+          '<div class="entry-stats"><span><b>10</b> 分</span></div></div></div>' +
+      '</div>'
+    );
+  }
+
   function renderEntries() {
     var host = document.getElementById("entryHost");
     if (activeTab === "gym") {
       host.innerHTML = gymDocs.length ? groupedList(gymDocs, gymEntryCard) : emptyGym();
     } else if (activeTab === "run") {
       host.innerHTML = runDocs.length ? groupedList(runDocs, runEntryCard) : emptyRun();
-    } else if (machineListMode === "day") {
-      if (machineDocs.length) {
-        host.innerHTML = groupedByDay(machineDocs, dayEntryCard(computeBestWeights()));
+    } else if (activeTab === "machine") {
+      if (machineListMode === "day") {
+        if (machineDocs.length) {
+          host.innerHTML = groupedByDay(machineDocs, dayEntryCard(computeBestWeights()));
+        } else {
+          host.innerHTML = (
+            '<div class="empty-state">' + ICONS.dumbbell +
+              '<p>まだマシンの記録がありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
+            '</div>'
+          );
+        }
       } else {
-        host.innerHTML = (
-          '<div class="empty-state">' + ICONS.dumbbell +
-            '<p>まだマシンの記録がありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
-          '</div>'
-        );
+        var records = machineDocs.filter(function (d) { return d.machine === selectedMachine; });
+        if (records.length) {
+          var bestWeight = records.reduce(function (mx, d) { return Math.max(mx, Number(d.weight) || 0); }, 0);
+          host.innerHTML = groupedList(records, machineEntryCard(bestWeight));
+        } else {
+          host.innerHTML = (
+            '<div class="empty-state">' + ICONS.dumbbell +
+              '<p>' + escapeHtml(selectedMachine || "マシン") + ' の記録はまだありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
+              '<div class="entry-card machine example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+                '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">40kg × 15回<span class="example-tag">例</span></span></div></div></div>' +
+            '</div>'
+          );
+        }
+      }
+    } else if (activeTab === "home") {
+      if (homeListMode === "day") {
+        if (homeDocs.length) {
+          host.innerHTML = groupedByDay(homeDocs, dayEntryCardHome(computeBestReps()));
+        } else {
+          host.innerHTML = (
+            '<div class="empty-state">' + ICONS.home +
+              '<p>まだ家トレの記録がありません。「＋ 記録を追加」から回数を残しましょう。</p>' +
+            '</div>'
+          );
+        }
+      } else {
+        var homeRecords = homeDocs.filter(function (d) { return d.exercise === selectedHome; });
+        if (homeRecords.length) {
+          var bestReps = homeRecords.reduce(function (mx, d) { return Math.max(mx, Number(d.reps) || 0); }, 0);
+          host.innerHTML = groupedList(homeRecords, homeEntryCard(bestReps));
+        } else {
+          host.innerHTML = (
+            '<div class="empty-state">' + ICONS.home +
+              '<p>' + escapeHtml(selectedHome || "家トレ") + ' の記録はまだありません。「＋ 記録を追加」から回数を残しましょう。</p>' +
+              '<div class="entry-card home example-card"><div class="entry-stripe"></div><div class="entry-main">' +
+                '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">20回<span class="example-tag">例</span></span></div></div></div>' +
+            '</div>'
+          );
+        }
       }
     } else {
-      var records = machineDocs.filter(function (d) { return d.machine === selectedMachine; });
-      if (records.length) {
-        var bestWeight = records.reduce(function (mx, d) { return Math.max(mx, Number(d.weight) || 0); }, 0);
-        host.innerHTML = groupedList(records, machineEntryCard(bestWeight));
-      } else {
-        host.innerHTML = (
-          '<div class="empty-state">' + ICONS.dumbbell +
-            '<p>' + escapeHtml(selectedMachine || "マシン") + ' の記録はまだありません。「＋ 記録を追加」から重さと回数を残しましょう。</p>' +
-            '<div class="entry-card machine example-card"><div class="entry-stripe"></div><div class="entry-main">' +
-              '<div class="entry-top"><span class="entry-date">' + todayStr() + '</span><span class="entry-title">40kg × 15回<span class="example-tag">例</span></span></div></div></div>' +
-          '</div>'
-        );
-      }
+      host.innerHTML = stretchDocs.length ? groupedList(stretchDocs, stretchEntryCard) : emptyStretch();
     }
     host.querySelectorAll("[data-del]").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -1408,6 +1736,101 @@
     }
   }
 
+  function renderHomePicker() {
+    var host = document.getElementById("homePickerHost");
+    if (activeTab !== "home") { host.innerHTML = ""; return; }
+
+    var options = allHomeOptions();
+    if (!selectedHome || options.indexOf(selectedHome) === -1) {
+      selectedHome = options[0] || null;
+      try { localStorage.setItem("chocozaplog_selected_home", selectedHome || ""); } catch (e) {}
+    }
+
+    var chips = options.map(function (m) {
+      var cls = "chip machine-chip" + (m === selectedHome ? " active" : "");
+      return '<button type="button" class="' + cls + '" data-home="' + escapeHtml(m) + '">' + escapeHtml(m) + '</button>';
+    }).join("");
+
+    var customInputHtml = customHomeInputOpen
+      ? '<span class="custom-input-row"><input type="text" id="customHomeInput" placeholder="種目名"><button type="button" class="btn btn-ghost" id="customHomeAdd">追加</button></span>'
+      : "";
+
+    var records = homeDocs.filter(function (d) { return d.exercise === selectedHome; });
+    sortDesc(records);
+    var last = records[0];
+    var bestReps = records.reduce(function (mx, d) { return Math.max(mx, Number(d.reps) || 0); }, 0);
+
+    var summaryHtml = selectedHome ? (
+      '<div class="machine-summary">' +
+        '<div class="machine-summary-name">' + escapeHtml(selectedHome) + '</div>' +
+        (last
+          ? '<div class="machine-summary-last">前回: <b>' + escapeHtml(last.reps) + '回</b>' + (last.sets > 1 ? ' ×' + escapeHtml(last.sets) + 'セット' : '') + ' <span>(' + escapeHtml(last.date) + ')</span></div>'
+          : '<div class="machine-summary-last">まだ記録がありません</div>') +
+        (bestReps ? '<div class="machine-summary-best">自己ベスト <b>' + bestReps + '回</b></div>' : "") +
+      '</div>'
+    ) : "";
+
+    var toggleHtml =
+      '<div class="view-toggle">' +
+        '<button type="button" class="view-toggle-btn' + (homeListMode === "exercise" ? " active" : "") + '" data-view="exercise">選択中の種目</button>' +
+        '<button type="button" class="view-toggle-btn' + (homeListMode === "day" ? " active" : "") + '" data-view="day">日付でまとめて表示</button>' +
+      '</div>';
+
+    host.innerHTML =
+      '<div class="machine-picker">' + chips +
+        '<button type="button" class="chip chip-add" id="homeCustomBtn">＋ その他</button>' +
+        customInputHtml +
+      '</div>' + summaryHtml + toggleHtml;
+
+    host.querySelectorAll(".view-toggle-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        homeListMode = btn.dataset.view;
+        render();
+      });
+    });
+
+    host.querySelectorAll("[data-home]").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        selectedHome = chip.dataset.home;
+        try { localStorage.setItem("chocozaplog_selected_home", selectedHome); } catch (e) {}
+        formOpen = false;
+        editingId = null;
+        customHomeInputOpen = false;
+        render();
+      });
+    });
+
+    document.getElementById("homeCustomBtn").addEventListener("click", function () {
+      customHomeInputOpen = !customHomeInputOpen;
+      render();
+    });
+
+    if (customHomeInputOpen) {
+      var input = document.getElementById("customHomeInput");
+      input.focus();
+      var commit = function () {
+        var name = input.value.trim();
+        if (name) {
+          try {
+            var customs = JSON.parse(localStorage.getItem("chocozaplog_custom_home") || "[]");
+            if (customs.indexOf(name) === -1) {
+              customs.push(name);
+              localStorage.setItem("chocozaplog_custom_home", JSON.stringify(customs));
+            }
+          } catch (e) {}
+          selectedHome = name;
+          try { localStorage.setItem("chocozaplog_selected_home", selectedHome); } catch (e) {}
+        }
+        customHomeInputOpen = false;
+        render();
+      };
+      document.getElementById("customHomeAdd").addEventListener("click", commit);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+      });
+    }
+  }
+
   function renderModeNote() {
     var note = document.getElementById("modeNote");
     if (mode === "local") {
@@ -1422,6 +1845,7 @@
     renderStats();
     renderTabs();
     renderMachinePicker();
+    renderHomePicker();
     renderForm();
     renderEntries();
     renderModeNote();
@@ -1430,6 +1854,8 @@
   document.getElementById("tabGymBtn").addEventListener("click", function () { activeTab = "gym"; formOpen = false; editingId = null; render(); });
   document.getElementById("tabRunBtn").addEventListener("click", function () { activeTab = "run"; formOpen = false; editingId = null; render(); });
   document.getElementById("tabMachineBtn").addEventListener("click", function () { activeTab = "machine"; formOpen = false; editingId = null; customInputOpen = false; render(); });
+  document.getElementById("tabHomeBtn").addEventListener("click", function () { activeTab = "home"; formOpen = false; editingId = null; customHomeInputOpen = false; render(); });
+  document.getElementById("tabStretchBtn").addEventListener("click", function () { activeTab = "stretch"; formOpen = false; editingId = null; render(); });
   document.getElementById("addToggleBtn").addEventListener("click", function () {
     formOpen = !formOpen;
     if (formOpen) editingId = null;
